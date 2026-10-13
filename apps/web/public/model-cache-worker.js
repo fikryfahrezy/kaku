@@ -1,4 +1,4 @@
-const CACHE_NAME = "kanjiwritr-model-v1";
+const CACHE_NAME = "kaku-model-v1";
 const ASSETS = [
   "/models/dakanji/char_classifier.onnx",
   "/models/dakanji/char_classifier_labels.txt",
@@ -21,8 +21,7 @@ self.addEventListener("activate", (event) => {
         Promise.all(
           keys
             .filter(
-              (key) =>
-                key.startsWith("kanjiwritr-model-") && key !== CACHE_NAME,
+              (key) => key.startsWith("kaku-model-") && key !== CACHE_NAME,
             )
             .map((key) => caches.delete(key)),
         ),

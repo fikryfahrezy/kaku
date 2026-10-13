@@ -51,12 +51,12 @@ jobs:
             exit 1
           fi
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
-          echo "artifact_name=kanjiwritr-browser-extensions-${version}" >> "${GITHUB_OUTPUT}"
+          echo "artifact_name=kaku-browser-extensions-${version}" >> "${GITHUB_OUTPUT}"
 
       - name: Build extensions
         env:
-          KANJIWRITR_DEFAULT_SERVER_URL: ${{ vars.KANJIWRITR_DEFAULT_SERVER_URL || 'http://localhost:3000' }}
-          KANJIWRITR_EXTENSION_VERSION: ${{ steps.metadata.outputs.version }}
+          KAKU_DEFAULT_SERVER_URL: ${{ vars.KAKU_DEFAULT_SERVER_URL || 'http://localhost:3000' }}
+          KAKU_EXTENSION_VERSION: ${{ steps.metadata.outputs.version }}
         run: bun run build:extension
 
       - name: Validate Firefox extension
@@ -70,7 +70,7 @@ jobs:
           mkdir -p artifacts
           git archive \
             --format=zip \
-            --output="artifacts/kanjiwritr-extension-source-${VERSION}.zip" \
+            --output="artifacts/kaku-extension-source-${VERSION}.zip" \
             HEAD \
             apps/extension \
             packages/protocol \
@@ -78,9 +78,9 @@ jobs:
             bun.lock \
             tsconfig.base.json
           cd apps/extension/dist/chromium
-          zip -qr "${GITHUB_WORKSPACE}/artifacts/kanjiwritr-chromium-${VERSION}.zip" .
+          zip -qr "${GITHUB_WORKSPACE}/artifacts/kaku-chromium-${VERSION}.zip" .
           cd "${GITHUB_WORKSPACE}/apps/extension/dist/firefox"
-          zip -qr "${GITHUB_WORKSPACE}/artifacts/kanjiwritr-firefox-${VERSION}.zip" .
+          zip -qr "${GITHUB_WORKSPACE}/artifacts/kaku-firefox-${VERSION}.zip" .
           cd "${GITHUB_WORKSPACE}/artifacts"
           sha256sum ./*.zip > SHA256SUMS.txt
 
@@ -124,12 +124,12 @@ jobs:
           fi
 
           mkdir -p firefox-source firefox-signed
-          unzip -q "artifacts/kanjiwritr-firefox-${VERSION}.zip" -d firefox-source
+          unzip -q "artifacts/kaku-firefox-${VERSION}.zip" -d firefox-source
           npx --yes web-ext@10.5.0 sign \
             --source-dir firefox-source \
             --artifacts-dir firefox-signed \
             --channel unlisted \
-            --upload-source-code "artifacts/kanjiwritr-extension-source-${VERSION}.zip" \
+            --upload-source-code "artifacts/kaku-extension-source-${VERSION}.zip" \
             --api-key "${AMO_JWT_ISSUER}" \
             --api-secret "${AMO_JWT_SECRET}"
 
@@ -138,7 +138,7 @@ jobs:
             echo "::error::Mozilla signing completed without producing an XPI."
             exit 1
           fi
-          mv "${signed_file}" "artifacts/kanjiwritr-firefox-${VERSION}-signed.xpi"
+          mv "${signed_file}" "artifacts/kaku-firefox-${VERSION}-signed.xpi"
 
       - name: Refresh checksums
         shell: bash
@@ -162,5 +162,5 @@ jobs:
             gh release create "${GITHUB_REF_NAME}" artifacts/* \
               --verify-tag \
               --generate-notes \
-              --title "Kanjiwritr ${GITHUB_REF_NAME}"
+              --title "Kaku ${GITHUB_REF_NAME}"
           fi

@@ -6,7 +6,7 @@ import type {
   DeviceRole,
   PairingClaimResponse,
   PairingRequestResponse,
-} from "@kanjiwritr/protocol";
+} from "@kaku/protocol";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 const CODE_TTL_MS = 10 * 60_000;

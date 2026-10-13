@@ -12,15 +12,15 @@ import {
   parseServerMessage,
   type ConnectionState,
   type DeliveryError,
-} from "@kanjiwritr/protocol";
+} from "@kaku/protocol";
 import { WritingCanvas } from "./WritingCanvas";
 import { createId } from "./id";
 import type { InkStroke, RecognitionResult, WritingTool } from "./ink-types";
 import { LocalRecognizer } from "./recognizer";
 import { segmentStrokes } from "./segmentation";
 
-const TOKEN_KEY = "kanjiwritr.device-token";
-const AUTO_SEND_KEY = "kanjiwritr.auto-send";
+const TOKEN_KEY = "kaku.device-token";
+const AUTO_SEND_KEY = "kaku.auto-send";
 const AUTO_SEND_DELAY_MS = 1_500;
 
 const stateLabel: Record<ConnectionState, string> = {
@@ -445,7 +445,7 @@ export function App() {
   return (
     <main class="app-shell">
       <header class="topbar">
-        <a class="brand brand--mark-only" href="/" aria-label="Kanjiwritr home">
+        <a class="brand brand--mark-only" href="/" aria-label="Kaku home">
           <span class="brand-mark" aria-hidden="true">
             書
           </span>

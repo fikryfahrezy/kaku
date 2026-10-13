@@ -1,4 +1,4 @@
-# Kanjiwritr
+# Kaku
 
 Handwrite Japanese on one device, confirm the text, and send it to the currently focused field in a paired browser.
 
@@ -34,7 +34,7 @@ bun run dev
 
 The static landing page runs at `http://localhost:5173`, and the writing app is available at `http://localhost:5173/app/`. Vite proxies `/ws` and `/healthz` to the Bun server on port `3000`.
 
-The server creates `data/kanjiwritr.sqlite` by default. Set a stable `CREDENTIAL_SECRET` in production so pending one-time pairing codes remain valid across a server restart. Device credentials are stored only as hashes, and delivered text is neither logged nor persisted.
+The server creates `data/kaku.sqlite` by default. Set a stable `CREDENTIAL_SECRET` in production so pending one-time pairing codes remain valid across a server restart. Device credentials are stored only as hashes, and delivered text is neither logged nor persisted.
 
 Rate limits are enabled by default. For unlimited local pairing attempts, set `RATE_LIMITS_ENABLED=false` in the root `.env` and restart the development server. Never disable them in production. Pairing issuance, pairing claims, and WebSocket authentication can be configured independently with the `*_RATE_LIMIT_MAX` and `*_RATE_LIMIT_WINDOW_SECONDS` variables documented in `.env.example`.
 
@@ -65,7 +65,7 @@ Then open `http://localhost:3000` or check `http://localhost:3000/healthz`.
 ## Browser receiver extensions
 
 Download packaged builds from the
-[latest GitHub Release](https://github.com/fikryfahrezy/kanjiwritr/releases/latest),
+[latest GitHub Release](https://github.com/fikryfahrezy/kaku/releases/latest),
 or build them locally as described below.
 
 After `bun run build`, the browser-specific extensions are available under
@@ -90,7 +90,7 @@ can be installed persistently after it is packaged and submitted to Firefox Add-
 Build the extension with the public server URL that should appear by default:
 
 ```sh
-KANJIWRITR_DEFAULT_SERVER_URL=https://your-kanjiwritr-domain.example bun run build:extension
+KAKU_DEFAULT_SERVER_URL=https://your-kaku-domain.example bun run build:extension
 ```
 
 The command above builds both targets. To build only one target, run
@@ -115,7 +115,7 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-Set the Actions repository variable `KANJIWRITR_DEFAULT_SERVER_URL` to make a
+Set the Actions repository variable `KAKU_DEFAULT_SERVER_URL` to make a
 deployed server the default in release builds. Without it, releases default to
 `http://localhost:3000`, and users can still change the server in the popup.
 
@@ -138,10 +138,10 @@ docker compose ps
 The service is exposed on port `3000` by default. Override the host port when necessary:
 
 ```sh
-KANJIWRITR_PORT=8080 docker compose up --build -d
+KAKU_PORT=8080 docker compose up --build -d
 ```
 
-Copy `.env.example` to `.env`, replace `CREDENTIAL_SECRET` with a long random value, then start Compose. The image runs as the unprivileged `bun` user, includes a `/healthz` health check, and persists SQLite in the `kanjiwritr-data` volume.
+Copy `.env.example` to `.env`, replace `CREDENTIAL_SECRET` with a long random value, then start Compose. The image runs as the unprivileged `bun` user, includes a `/healthz` health check, and persists SQLite in the `kaku-data` volume.
 
 When the service is behind Cloudflare, set `TRUST_CLOUDFLARE_PROXY=true` so rate limits use Cloudflare's validated `CF-Connecting-IP` value instead of the proxy connection address. Enable this only when clients cannot bypass Cloudflare and reach the origin directly—for example, use Cloudflare Tunnel or restrict origin ingress to Cloudflare.
 
@@ -156,5 +156,5 @@ See [docs/pairing-protocol.md](docs/pairing-protocol.md) for the relay design an
 With a built server running, verify pairing, presence, isolated routing, acknowledgements, and revocation:
 
 ```sh
-KANJIWRITR_TEST_URL=http://127.0.0.1:3000 bun run test:integration
+KAKU_TEST_URL=http://127.0.0.1:3000 bun run test:integration
 ```

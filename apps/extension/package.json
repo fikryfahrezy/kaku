@@ -1,7 +1,7 @@
 {
-  "name": "@kanjiwritr/extension",
+  "name": "@kaku/extension",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.9",
   "type": "module",
   "scripts": {
     "build": "bun scripts/build.ts",
@@ -10,7 +10,7 @@
     "typecheck": "tsc --pretty false"
   },
   "dependencies": {
-    "@kanjiwritr/protocol": "workspace:*"
+    "@kaku/protocol": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "1.2.21",

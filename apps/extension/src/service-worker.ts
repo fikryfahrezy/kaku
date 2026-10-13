@@ -2,9 +2,9 @@ import {
   encodeClientMessage,
   parseServerMessage,
   type DeliveryError,
-} from "@kanjiwritr/protocol";
+} from "@kaku/protocol";
 
-declare const __KANJIWRITR_DEFAULT_SERVER_URL__: string;
+declare const __KAKU_DEFAULT_SERVER_URL__: string;
 
 type ExtensionConnectionState =
   | "not-paired"
@@ -34,7 +34,7 @@ interface FocusedFrame {
 }
 
 const defaults: ExtensionState = {
-  serverUrl: __KANJIWRITR_DEFAULT_SERVER_URL__,
+  serverUrl: __KAKU_DEFAULT_SERVER_URL__,
   connectionState: "not-paired",
 };
 
@@ -238,7 +238,7 @@ function connect(state: ExtensionState): void {
     if (socket === connection)
       void updateState({
         connectionState: "error",
-        lastError: "Cannot reach the Kanjiwritr server.",
+        lastError: "Cannot reach the Kaku server.",
       });
   });
 }

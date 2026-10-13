@@ -13,7 +13,7 @@ afterEach(() => {
 
 describe("PairingStore", () => {
   test("issues separate device credentials and consumes a code once", () => {
-    const directory = mkdtempSync(join(tmpdir(), "kanjiwritr-store-"));
+    const directory = mkdtempSync(join(tmpdir(), "kaku-store-"));
     directories.push(directory);
     const path = join(directory, "pairing.sqlite");
     const store = new PairingStore(path, "test-only-secret");
@@ -43,7 +43,7 @@ describe("PairingStore", () => {
   });
 
   test("revokes both sides of a pairing", () => {
-    const directory = mkdtempSync(join(tmpdir(), "kanjiwritr-store-"));
+    const directory = mkdtempSync(join(tmpdir(), "kaku-store-"));
     directories.push(directory);
     const store = new PairingStore(
       join(directory, "pairing.sqlite"),
@@ -61,7 +61,7 @@ describe("PairingStore", () => {
   });
 
   test("rejects an expired pairing code", () => {
-    const directory = mkdtempSync(join(tmpdir(), "kanjiwritr-store-"));
+    const directory = mkdtempSync(join(tmpdir(), "kaku-store-"));
     directories.push(directory);
     const path = join(directory, "pairing.sqlite");
     const store = new PairingStore(path, "test-only-secret");
@@ -75,7 +75,7 @@ describe("PairingStore", () => {
   });
 
   test("renames the legacy writing-device role", () => {
-    const directory = mkdtempSync(join(tmpdir(), "kanjiwritr-store-"));
+    const directory = mkdtempSync(join(tmpdir(), "kaku-store-"));
     directories.push(directory);
     const path = join(directory, "pairing.sqlite");
     const database = new Database(path);

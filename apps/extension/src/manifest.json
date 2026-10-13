@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Kanjiwritr",
-  "version": "0.4.0",
-  "description": "Insert Japanese text from Kanjiwritr into the current web page.",
+  "name": "Kaku",
+  "version": "0.5.9",
+  "description": "Insert Japanese text from Kaku into the current web page.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon-16.png",
@@ -13,7 +13,7 @@
   "permissions": ["activeTab", "alarms", "storage"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "action": {
-    "default_title": "Kanjiwritr",
+    "default_title": "Kaku",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

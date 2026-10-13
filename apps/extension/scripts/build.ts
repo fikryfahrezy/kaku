@@ -5,12 +5,12 @@ const root = resolve(import.meta.dir, "..");
 const source = resolve(root, "src");
 const output = resolve(root, "dist");
 const defaultServerUrl =
-  process.env.KANJIWRITR_DEFAULT_SERVER_URL ?? "http://localhost:3000";
+  process.env.KAKU_DEFAULT_SERVER_URL ?? "http://localhost:3000";
 const packageMetadata = (await Bun.file(
   resolve(root, "package.json"),
 ).json()) as { version?: unknown };
 const extensionVersion =
-  process.env.KANJIWRITR_EXTENSION_VERSION ?? packageMetadata.version;
+  process.env.KAKU_EXTENSION_VERSION ?? packageMetadata.version;
 const requestedBrowser = Bun.argv[2];
 const browsers = [
   { name: "chromium", manifest: "manifest.json" },
@@ -57,7 +57,7 @@ for (const browser of selectedBrowsers) {
     naming: "[name].js",
     minify: true,
     define: {
-      __KANJIWRITR_DEFAULT_SERVER_URL__: JSON.stringify(defaultServerUrl),
+      __KAKU_DEFAULT_SERVER_URL__: JSON.stringify(defaultServerUrl),
     },
   });
 

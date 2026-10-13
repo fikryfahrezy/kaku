@@ -3,17 +3,17 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "kanjiwritr",
+      "name": "kaku",
       "devDependencies": {
         "oxfmt": "^0.65.0",
         "oxlint": "^1.80.0",
       },
     },
     "apps/extension": {
-      "name": "@kanjiwritr/extension",
-      "version": "0.4.0",
+      "name": "@kaku/extension",
+      "version": "0.5.9",
       "dependencies": {
-        "@kanjiwritr/protocol": "workspace:*",
+        "@kaku/protocol": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "1.2.21",
@@ -22,10 +22,10 @@
       },
     },
     "apps/server": {
-      "name": "@kanjiwritr/server",
-      "version": "0.4.0",
+      "name": "@kaku/server",
+      "version": "0.5.9",
       "dependencies": {
-        "@kanjiwritr/protocol": "workspace:*",
+        "@kaku/protocol": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "1.2.21",
@@ -33,10 +33,10 @@
       },
     },
     "apps/web": {
-      "name": "@kanjiwritr/web",
-      "version": "0.4.0",
+      "name": "@kaku/web",
+      "version": "0.5.9",
       "dependencies": {
-        "@kanjiwritr/protocol": "workspace:*",
+        "@kaku/protocol": "workspace:*",
         "onnxruntime-web": "1.22.0",
         "solid-js": "1.9.9",
       },
@@ -47,8 +47,8 @@
       },
     },
     "packages/protocol": {
-      "name": "@kanjiwritr/protocol",
-      "version": "0.4.0",
+      "name": "@kaku/protocol",
+      "version": "0.5.9",
     },
   },
   "packages": {
@@ -150,13 +150,13 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@kanjiwritr/extension": ["@kanjiwritr/extension@workspace:apps/extension"],
+    "@kaku/extension": ["@kaku/extension@workspace:apps/extension"],
 
-    "@kanjiwritr/protocol": ["@kanjiwritr/protocol@workspace:packages/protocol"],
+    "@kaku/protocol": ["@kaku/protocol@workspace:packages/protocol"],
 
-    "@kanjiwritr/server": ["@kanjiwritr/server@workspace:apps/server"],
+    "@kaku/server": ["@kaku/server@workspace:apps/server"],
 
-    "@kanjiwritr/web": ["@kanjiwritr/web@workspace:apps/web"],
+    "@kaku/web": ["@kaku/web@workspace:apps/web"],
 
     "@napi-rs/lzma-linux-x64-gnu": ["@napi-rs/lzma-linux-x64-gnu@1.5.1", "", { "os": "linux", "cpu": "x64" }, "sha512-oTXEIha4SsuXdTA4Iyskj0kpdx2yVXdhd75c2v3xGrHFfVMsbhTPZU/nMPL4sWKo4pBHm3aucLaqGlF696dTyQ=="],
 

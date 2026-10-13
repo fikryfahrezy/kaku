@@ -1,7 +1,7 @@
 {
-  "name": "@kanjiwritr/web",
+  "name": "@kaku/web",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.9",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
@@ -9,7 +9,7 @@
     "typecheck": "tsc -b --pretty false"
   },
   "dependencies": {
-    "@kanjiwritr/protocol": "workspace:*",
+    "@kaku/protocol": "workspace:*",
     "onnxruntime-web": "1.22.0",
     "solid-js": "1.9.9"
   },

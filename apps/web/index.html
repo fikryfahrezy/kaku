@@ -14,10 +14,7 @@
     />
     <meta name="robots" content="index,follow" />
     <meta property="og:type" content="website" />
-    <meta
-      property="og:title"
-      content="Kanjiwritr — Write here, use it anywhere"
-    />
+    <meta property="og:title" content="Kaku — Write here, use it anywhere" />
     <meta
       property="og:description"
       content="Handwrite Japanese on one device and send the matched text to your paired browser."
@@ -34,14 +31,14 @@
       src="https://analytics.fahrezy.work/script.js"
       data-website-id="3443101f-e301-48fd-935a-ec8b5c6c50eb"
     ></script>
-    <title>Kanjiwritr — Write Japanese here, use it anywhere</title>
+    <title>Kaku — Write Japanese here, use it anywhere</title>
   </head>
   <body>
     <div class="landing-shell">
       <header class="landing-nav">
-        <a class="brand" href="/" aria-label="Kanjiwritr home">
+        <a class="brand" href="/" aria-label="Kaku home">
           <span class="brand-mark" aria-hidden="true">書</span>
-          <span>Kanjiwritr</span>
+          <span>Kaku</span>
         </a>
         <nav aria-label="Main navigation">
           <a href="#download">Get the extension</a>
@@ -88,7 +85,7 @@
                 src="/app-preview.png"
                 width="1573"
                 height="1000"
-                alt="Kanjiwritr writing pad showing handwritten Japanese, recognition candidates, and confirmed text"
+                alt="Kaku writing pad showing handwritten Japanese, recognition candidates, and confirmed text"
                 fetchpriority="high"
               />
             </figure>
@@ -128,8 +125,8 @@
 
               <a
                 class="download-action"
-                href="https://github.com/fikryfahrezy/kanjiwritr/releases/latest"
-                data-release-asset="kanjiwritr-chromium-"
+                href="https://github.com/fikryfahrezy/kaku/releases/latest"
+                data-release-asset="kaku-chromium-"
                 download
               >
                 Download for Chromium <span aria-hidden="true">↓</span>
@@ -162,8 +159,8 @@
                 <li>
                   <span>04</span>
                   <p>
-                    Open Kanjiwritr from the extensions menu and request a
-                    pairing code.
+                    Open Kaku from the extensions menu and request a pairing
+                    code.
                   </p>
                 </li>
               </ol>
@@ -180,8 +177,8 @@
 
               <a
                 class="download-action"
-                href="https://github.com/fikryfahrezy/kanjiwritr/releases/latest"
-                data-release-asset="kanjiwritr-firefox-"
+                href="https://github.com/fikryfahrezy/kaku/releases/latest"
+                data-release-asset="kaku-firefox-"
                 download
               >
                 Download for Firefox <span aria-hidden="true">↓</span>
@@ -205,8 +202,8 @@
                 <li>
                   <span>03</span>
                   <p>
-                    Open Kanjiwritr from the extensions menu and request a
-                    pairing code.
+                    Open Kaku from the extensions menu and request a pairing
+                    code.
                   </p>
                 </li>
                 <li>
@@ -215,7 +212,7 @@
                     For a permanent install, use the signed XPI when it is
                     available on the
                     <a
-                      href="https://github.com/fikryfahrezy/kanjiwritr/releases/latest"
+                      href="https://github.com/fikryfahrezy/kaku/releases/latest"
                       >latest release</a
                     >.
                   </p>
@@ -297,21 +294,17 @@
       </main>
 
       <footer class="landing-footer">
-        <a class="brand" href="/" aria-label="Kanjiwritr home">
-          <span class="brand-mark" aria-hidden="true">書</span
-          ><span>Kanjiwritr</span>
+        <a class="brand" href="/" aria-label="Kaku home">
+          <span class="brand-mark" aria-hidden="true">書</span><span>Kaku</span>
         </a>
         <p>Handwrite on one device. Continue on another.</p>
         <span>Browser handwriting input · 2026</span>
       </footer>
     </div>
     <script>
-      fetch(
-        "https://api.github.com/repos/fikryfahrezy/kanjiwritr/releases/latest",
-        {
-          headers: { Accept: "application/vnd.github+json" },
-        },
-      )
+      fetch("https://api.github.com/repos/fikryfahrezy/kaku/releases/latest", {
+        headers: { Accept: "application/vnd.github+json" },
+      })
         .then((response) => {
           if (!response.ok) throw new Error("Latest release was unavailable");
           return response.json();

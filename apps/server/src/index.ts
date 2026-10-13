@@ -6,7 +6,7 @@ import {
   type DeliveryError,
   type DeviceRole,
   type ServerMessage,
-} from "@kanjiwritr/protocol";
+} from "@kaku/protocol";
 import { PairingStore, type AuthenticatedDevice } from "./pairing-store";
 import { RateLimiter } from "./rate-limiter";
 import { clientAddress } from "./client-address";
@@ -31,9 +31,7 @@ interface DeliveryResult {
 const host = process.env.HOST ?? "0.0.0.0";
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
 const webRoot = resolve(process.env.WEB_ROOT ?? "apps/web/dist");
-const databasePath = resolve(
-  process.env.DATABASE_PATH ?? "data/kanjiwritr.sqlite",
-);
+const databasePath = resolve(process.env.DATABASE_PATH ?? "data/kaku.sqlite");
 const credentialSecret =
   process.env.CREDENTIAL_SECRET ?? randomBytes(32).toString("base64url");
 const rateLimitsEnabled =
@@ -84,7 +82,7 @@ const server = Bun.serve<SocketData>({
 
     if (url.pathname === "/healthz") {
       return Response.json(
-        { status: "ok", service: "kanjiwritr" },
+        { status: "ok", service: "kaku" },
         {
           headers: { "cache-control": "no-store" },
         },
@@ -329,9 +327,7 @@ const server = Bun.serve<SocketData>({
   },
 });
 
-console.info(
-  `Kanjiwritr listening on http://${server.hostname}:${server.port}`,
-);
+console.info(`Kaku listening on http://${server.hostname}:${server.port}`);
 
 const cleanupTimer = setInterval(() => {
   store.cleanup();
@@ -344,7 +340,7 @@ const cleanupTimer = setInterval(() => {
 
 for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
-    console.info(`Received ${signal}; closing Kanjiwritr.`);
+    console.info(`Received ${signal}; closing Kaku.`);
     clearInterval(cleanupTimer);
     for (const pending of pendingDeliveries.values())
       clearTimeout(pending.timeout);

@@ -1,5 +1,5 @@
 {
-  "name": "kanjiwritr",
+  "name": "kaku",
   "private": true,
   "workspaces": [
     "apps/*",
