@@ -13,6 +13,16 @@ kept beside the model at `apps/web/public/models/dakanji/LICENSE.txt`. The
 model originates from the official DaKanji Single Kanji Recognition v2.0
 release: <https://github.com/dariyooo/DaKanji-Single-Kanji-Recognition/releases/tag/v2.0>.
 
+The author-requested credit, “Character recognition powered by machine learning
+from CaptainDario (DaAppLab)”, appears on `/licenses/`, linked from the landing
+page and writing app. That page also links to the complete third-party notices.
+Every web build regenerates those notices from packages included in the browser
+and worker bundles and the vendored ONNX Runtime license and third-party notices.
+Missing dependency licenses or mismatched ONNX Runtime versions/assets fail the
+build. See `apps/web/licenses/README.md` when upgrading the runtime. Commit the
+generated `apps/web/public/licenses/THIRD_PARTY_NOTICES.txt` snapshot after
+dependency updates so notices are also available in local development.
+
 ## Pipeline
 
 1. Pointer samples record normalized position, pressure, timestamp, pointer

@@ -145,6 +145,11 @@ When the service is behind Cloudflare, set `TRUST_CLOUDFLARE_PROXY=true` so rate
 
 ## Handwriting recognition
 
+Open-source credits and full license notices are available at `/licenses/`,
+linked from the landing page and writing app. Web builds regenerate the bundled
+dependency notices; see [runtime notice maintenance](apps/web/licenses/README.md)
+when upgrading ONNX Runtime.
+
 The writing app captures stylus, touch, and mouse strokes with pressure, timing, and bounds. A Web Worker segments visible character cells and runs the self-hosted MIT-licensed DaKanji ONNX model through single-threaded ONNX Runtime Web WASM. Model assets are cached for repeat visits. Recognition choices and sentence suggestions remain editable, and raw strokes never leave the writing device.
 
 See [docs/pairing-protocol.md](docs/pairing-protocol.md) for the relay design and [docs/recognition.md](docs/recognition.md) for model licensing, limitations, caching, and measurement details.

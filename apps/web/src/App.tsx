@@ -465,6 +465,14 @@ export function App() {
             </div>
           </div>
         </Show>
+        <a
+          class="app-licenses"
+          href="/licenses/"
+          target="_blank"
+          rel="noopener"
+        >
+          Open-source licenses
+        </a>
       </header>
 
       <Show

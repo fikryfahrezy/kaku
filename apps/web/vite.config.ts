@@ -1,14 +1,19 @@
 import { defineConfig } from "vite";
 import solid from "vite-plugin-solid";
 import { resolve } from "node:path";
+import { licenseNotices } from "./license-notices";
+
+const notices = licenseNotices();
 
 export default defineConfig({
-  plugins: [solid()],
+  plugins: [solid(), notices.main],
+  worker: { plugins: () => [notices.worker()] },
   build: {
     rollupOptions: {
       input: {
         landing: resolve("index.html"),
         app: resolve("app/index.html"),
+        licenses: resolve("licenses/index.html"),
       },
     },
   },

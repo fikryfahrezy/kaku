@@ -1895,3 +1895,10 @@ h2 {
     flex: 1;
   }
 }
+.app-licenses {
+  margin-left: auto;
+  max-width: 7rem;
+  font-size: 0.75rem;
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
