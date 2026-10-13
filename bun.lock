@@ -11,7 +11,7 @@
     },
     "apps/extension": {
       "name": "@kaku/extension",
-      "version": "0.5.9",
+      "version": "0.6.9",
       "dependencies": {
         "@kaku/protocol": "workspace:*",
       },
@@ -23,7 +23,7 @@
     },
     "apps/server": {
       "name": "@kaku/server",
-      "version": "0.5.9",
+      "version": "0.6.9",
       "dependencies": {
         "@kaku/protocol": "workspace:*",
       },
@@ -34,7 +34,7 @@
     },
     "apps/web": {
       "name": "@kaku/web",
-      "version": "0.5.9",
+      "version": "0.6.9",
       "dependencies": {
         "@kaku/protocol": "workspace:*",
         "onnxruntime-web": "1.22.0",
@@ -48,7 +48,7 @@
     },
     "packages/protocol": {
       "name": "@kaku/protocol",
-      "version": "0.5.9",
+      "version": "0.6.9",
     },
   },
   "packages": {

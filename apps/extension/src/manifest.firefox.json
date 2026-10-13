@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kaku",
-  "version": "0.5.9",
+  "version": "0.6.9",
   "description": "Insert Japanese text from Kaku into the current web page.",
   "browser_specific_settings": {
     "gecko": {

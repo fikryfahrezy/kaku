@@ -2,7 +2,8 @@
 
 Kaku uses the **DaKanji Single Kanji Recognition v2.0** classifier for
 milestone 3. The self-hosted model accepts a 96×96 grayscale character image
-and returns probabilities for 6,000+ kanji. It is small enough for a
+and returns probabilities for 6,000+ character labels, including kanji,
+hiragana, and katakana. It is small enough for a
 browser-based writing app, runs with ONNX Runtime Web's single-threaded WASM
 backend, and does not need WebGL, cross-origin isolation, or a recognition
 service.
@@ -20,14 +21,17 @@ release: <https://github.com/dariyooo/DaKanji-Single-Kanji-Recognition/releases/
    non-empty cells left-to-right, top-to-bottom. This supports long sentences
    and multiple lines without transmitting ink.
 3. A dedicated Web Worker rasterizes each group, normalizes it to 96×96, runs
-   local ONNX inference, and retains the top five kanji probabilities.
+   local ONNX inference, and retains the top five kanji, hiragana, or katakana
+   candidates by probability.
 4. A width-five beam search combines the top three candidates per group into
    ranked sentence suggestions. The user must confirm or edit the result before
    delivery.
 
-DaKanji is a kanji classifier, not a kana model. Kana and punctuation should be
-entered through the accessible typed fallback or added while editing the
-confirmed sentence.
+Recognition supports kanji and the hiragana and katakana present in the bundled
+model's label map. Kana coverage is incomplete; characters absent from that map
+and punctuation should be entered through the accessible typed fallback or
+added while editing the confirmed sentence. Write each character in its own
+cell, keeping dakuten and handakuten in the same cell as the base character.
 
 ## Caching and measurement
 

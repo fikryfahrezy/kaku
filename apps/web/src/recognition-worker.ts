@@ -203,7 +203,7 @@ function topCandidates(
   const candidates: CharacterCandidate[] = [];
   for (let index = 0; index < probabilities.length; index += 1) {
     const character = labels[index];
-    if (!character || !isKanji(character)) continue;
+    if (!character || !isJapaneseCharacter(character)) continue;
     const confidence = Number(probabilities[index]);
     if (
       candidates.length < 5 ||
@@ -217,11 +217,14 @@ function topCandidates(
   return candidates;
 }
 
-function isKanji(value: string): boolean {
+function isJapaneseCharacter(value: string): boolean {
   const scalar = value.codePointAt(0);
   return (
     scalar !== undefined &&
-    ((scalar >= 0x3400 && scalar <= 0x4dbf) ||
+    ((scalar >= 0x3041 && scalar <= 0x3096) ||
+      (scalar >= 0x30a1 && scalar <= 0x30fa) ||
+      scalar === 0x30fc ||
+      (scalar >= 0x3400 && scalar <= 0x4dbf) ||
       (scalar >= 0x4e00 && scalar <= 0x9fff) ||
       (scalar >= 0xf900 && scalar <= 0xfaff))
   );
