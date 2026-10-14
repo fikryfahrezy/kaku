@@ -11,7 +11,7 @@
   "quoteProps": "as-needed",
   "trailingComma": "all",
   "singleAttributePerLine": false,
-  "htmlWhitespaceSensitivity": "css",
+  "htmlWhitespaceSensitivity": "ignore",
   "vueIndentScriptAndStyle": false,
   "proseWrap": "preserve",
   "printWidth": 80,
