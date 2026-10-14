@@ -1,3 +1,4 @@
+import { RecognitionMessageType } from "./recognition-messages";
 import * as ort from "onnxruntime-web/wasm";
 import type {
   CharacterCandidate,
@@ -8,7 +9,7 @@ import type {
 import { sentenceSuggestions } from "./segmentation";
 
 interface RecognizeRequest {
-  type: "recognize";
+  type: RecognitionMessageType.Recognize;
   requestId: string;
   groups: CharacterGroup[];
   width: number;
@@ -39,17 +40,17 @@ ort.env.wasm.wasmPaths = {
 };
 
 worker.addEventListener("message", (event: MessageEvent<RecognizeRequest>) => {
-  if (event.data.type !== "recognize") return;
+  if (event.data.type !== RecognitionMessageType.Recognize) return;
   void recognize(event.data).then(
     (result) =>
       worker.postMessage({
-        type: "result",
+        type: RecognitionMessageType.Result,
         requestId: event.data.requestId,
         result,
       }),
     (cause: unknown) =>
       worker.postMessage({
-        type: "error",
+        type: RecognitionMessageType.Error,
         requestId: event.data.requestId,
         error:
           cause instanceof Error ? cause.message : "Local recognition failed.",

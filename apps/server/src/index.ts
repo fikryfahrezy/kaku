@@ -1,16 +1,18 @@
 import { resolve, sep } from "node:path";
 import { randomBytes } from "node:crypto";
 import {
+  ProtocolErrorCode,
+  MessageType,
   encodeServerMessage,
   parseClientMessage,
-  type DeliveryError,
-  type DeviceRole,
+  DeliveryError,
+  DeviceRole,
   type ServerMessage,
 } from "@kaku/protocol";
 import { PairingStore, type AuthenticatedDevice } from "./pairing-store";
 import { RateLimiter } from "./rate-limiter";
 import { clientAddress } from "./client-address";
-import { rateLimitConfig } from "./config";
+import { RateLimitScope, rateLimitConfig } from "./config";
 
 interface SocketData extends AuthenticatedDevice {
   connectionId: string;
@@ -38,9 +40,24 @@ const rateLimitsEnabled =
   process.env.RATE_LIMITS_ENABLED?.toLowerCase() !== "false";
 const trustCloudflareProxy =
   process.env.TRUST_CLOUDFLARE_PROXY?.toLowerCase() === "true";
-const pairingRateLimit = rateLimitConfig(process.env, "PAIRING", 8, 60 * 60);
-const claimRateLimit = rateLimitConfig(process.env, "CLAIM", 20, 10 * 60);
-const websocketRateLimit = rateLimitConfig(process.env, "WEBSOCKET", 40, 60);
+const pairingRateLimit = rateLimitConfig(
+  process.env,
+  RateLimitScope.Pairing,
+  8,
+  60 * 60,
+);
+const claimRateLimit = rateLimitConfig(
+  process.env,
+  RateLimitScope.Claim,
+  20,
+  10 * 60,
+);
+const websocketRateLimit = rateLimitConfig(
+  process.env,
+  RateLimitScope.Websocket,
+  40,
+  60,
+);
 const longestRateLimitWindowMs = Math.max(
   pairingRateLimit.windowMs,
   claimRateLimit.windowMs,
@@ -101,7 +118,7 @@ const server = Bun.serve<SocketData>({
           pairingRateLimit.windowMs,
         )
       )
-        return apiError(429, "rate_limited");
+        return apiError(429, ProtocolErrorCode.RateLimited);
       return apiJson(store.createPairing(), 201);
     }
 
@@ -113,7 +130,7 @@ const server = Bun.serve<SocketData>({
           claimRateLimit.windowMs,
         )
       )
-        return apiError(429, "rate_limited");
+        return apiError(429, ProtocolErrorCode.RateLimited);
       const body = await parseSmallJson(request);
       if (!body || typeof body.code !== "string")
         return apiError(400, "invalid_request");
@@ -121,19 +138,19 @@ const server = Bun.serve<SocketData>({
       if (!session) return apiError(400, "invalid_or_expired_code");
       const writer = store.authenticate(session.token);
       if (writer)
-        sendToRole(writer.pairingId, "extension", {
-          type: "pairing.completed",
+        sendToRole(writer.pairingId, DeviceRole.Extension, {
+          type: MessageType.PairingCompleted,
         });
       return apiJson(session, 200);
     }
 
     if (url.pathname === "/api/session" && request.method === "GET") {
       const device = authenticateHttp(request);
-      if (!device) return apiError(401, "unauthorized");
+      if (!device) return apiError(401, ProtocolErrorCode.Unauthorized);
       return apiJson(
         {
           role: device.role,
-          extensionOnline: roleOnline(device.pairingId, "extension"),
+          extensionOnline: roleOnline(device.pairingId, DeviceRole.Extension),
         },
         200,
       );
@@ -144,7 +161,7 @@ const server = Bun.serve<SocketData>({
       request.method === "DELETE"
     ) {
       const device = authenticateHttp(request);
-      if (!device) return apiError(401, "unauthorized");
+      if (!device) return apiError(401, ProtocolErrorCode.Unauthorized);
       store.revokePairing(device.pairingId);
       for (const socket of connections.get(device.pairingId) ?? []) {
         socket.close(1008, "Pairing revoked");
@@ -164,10 +181,10 @@ const server = Bun.serve<SocketData>({
           websocketRateLimit.windowMs,
         )
       )
-        return apiError(429, "rate_limited");
+        return apiError(429, ProtocolErrorCode.RateLimited);
       const token = url.searchParams.get("token");
       const device = token ? store.authenticate(token) : undefined;
-      if (!device) return apiError(401, "unauthorized");
+      if (!device) return apiError(401, ProtocolErrorCode.Unauthorized);
       const upgraded = bunServer.upgrade(request, {
         data: { ...device, connectionId: crypto.randomUUID() },
       });
@@ -199,26 +216,32 @@ const server = Bun.serve<SocketData>({
       connections.set(socket.data.pairingId, pairingSockets);
       store.touch(socket.data.deviceId);
       send(socket, {
-        type: "connection.ready",
+        type: MessageType.ConnectionReady,
         connectionId: socket.data.connectionId,
         role: socket.data.role,
         paired: socket.data.paired,
       });
-      if (socket.data.role === "writer") {
+      if (socket.data.role === DeviceRole.Writer) {
         send(socket, {
-          type: "presence.changed",
-          extensionOnline: roleOnline(socket.data.pairingId, "extension"),
+          type: MessageType.PresenceChanged,
+          extensionOnline: roleOnline(
+            socket.data.pairingId,
+            DeviceRole.Extension,
+          ),
         });
       } else {
-        sendToRole(socket.data.pairingId, "writer", {
-          type: "presence.changed",
+        sendToRole(socket.data.pairingId, DeviceRole.Writer, {
+          type: MessageType.PresenceChanged,
           extensionOnline: true,
         });
       }
     },
     message(socket, payload) {
       if (byteLength(payload) > maximumMessageBytes) {
-        send(socket, { type: "protocol.error", code: "message_too_large" });
+        send(socket, {
+          type: MessageType.ProtocolError,
+          code: ProtocolErrorCode.MessageTooLarge,
+        });
         socket.close(1009, "Message too large");
         return;
       }
@@ -227,41 +250,53 @@ const server = Bun.serve<SocketData>({
         typeof payload === "string" ? payload : payload.toString(),
       );
       if (!message) {
-        send(socket, { type: "protocol.error", code: "invalid_message" });
+        send(socket, {
+          type: MessageType.ProtocolError,
+          code: ProtocolErrorCode.InvalidMessage,
+        });
         return;
       }
       store.touch(socket.data.deviceId);
-      if (message.type === "ping") {
-        send(socket, { type: "pong" });
+      if (message.type === MessageType.Ping) {
+        send(socket, { type: MessageType.Pong });
         return;
       }
 
       const deliveryKey = `${socket.data.pairingId}:${message.messageId}`;
-      if (message.type === "text.deliver") {
-        if (socket.data.role !== "writer") {
-          send(socket, { type: "protocol.error", code: "wrong_device_role" });
+      if (message.type === MessageType.TextDeliver) {
+        if (socket.data.role !== DeviceRole.Writer) {
+          send(socket, {
+            type: MessageType.ProtocolError,
+            code: ProtocolErrorCode.WrongDeviceRole,
+          });
           return;
         }
         const previous = completedDeliveries.get(deliveryKey);
         if (previous) {
           send(socket, {
-            type: "delivery.result",
+            type: MessageType.DeliveryResult,
             messageId: message.messageId,
             ...previousResult(previous),
           });
           return;
         }
         if (pendingDeliveries.has(deliveryKey)) {
-          send(socket, { type: "protocol.error", code: "duplicate_message" });
+          send(socket, {
+            type: MessageType.ProtocolError,
+            code: ProtocolErrorCode.DuplicateMessage,
+          });
           return;
         }
-        const receiver = firstSocket(socket.data.pairingId, "extension");
+        const receiver = firstSocket(
+          socket.data.pairingId,
+          DeviceRole.Extension,
+        );
         if (!receiver) {
           send(socket, {
-            type: "delivery.result",
+            type: MessageType.DeliveryResult,
             messageId: message.messageId,
             delivered: false,
-            error: "peer_offline",
+            error: DeliveryError.PeerOffline,
           });
           return;
         }
@@ -269,13 +304,13 @@ const server = Bun.serve<SocketData>({
           pendingDeliveries.delete(deliveryKey);
           rememberResult(deliveryKey, {
             delivered: false,
-            error: "delivery_timeout",
+            error: DeliveryError.DeliveryTimeout,
           });
           send(socket, {
-            type: "delivery.result",
+            type: MessageType.DeliveryResult,
             messageId: message.messageId,
             delivered: false,
-            error: "delivery_timeout",
+            error: DeliveryError.DeliveryTimeout,
           });
         }, deliveryTimeoutMs);
         pendingDeliveries.set(deliveryKey, {
@@ -284,15 +319,18 @@ const server = Bun.serve<SocketData>({
           timeout,
         });
         send(receiver, {
-          type: "text.delivery",
+          type: MessageType.TextDelivery,
           messageId: message.messageId,
           text: message.text,
         });
         return;
       }
 
-      if (socket.data.role !== "extension") {
-        send(socket, { type: "protocol.error", code: "wrong_device_role" });
+      if (socket.data.role !== DeviceRole.Extension) {
+        send(socket, {
+          type: MessageType.ProtocolError,
+          code: ProtocolErrorCode.WrongDeviceRole,
+        });
         return;
       }
       const pending = pendingDeliveries.get(deliveryKey);
@@ -305,7 +343,7 @@ const server = Bun.serve<SocketData>({
       };
       rememberResult(deliveryKey, result);
       send(pending.writer, {
-        type: "delivery.result",
+        type: MessageType.DeliveryResult,
         messageId: message.messageId,
         ...result,
       });
@@ -315,11 +353,11 @@ const server = Bun.serve<SocketData>({
       pairingSockets?.delete(socket);
       if (pairingSockets?.size === 0) connections.delete(socket.data.pairingId);
       if (
-        socket.data.role === "extension" &&
-        !roleOnline(socket.data.pairingId, "extension")
+        socket.data.role === DeviceRole.Extension &&
+        !roleOnline(socket.data.pairingId, DeviceRole.Extension)
       ) {
-        sendToRole(socket.data.pairingId, "writer", {
-          type: "presence.changed",
+        sendToRole(socket.data.pairingId, DeviceRole.Writer, {
+          type: MessageType.PresenceChanged,
           extensionOnline: false,
         });
       }

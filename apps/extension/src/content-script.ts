@@ -1,4 +1,5 @@
-type InsertMessage = { type: "insert-text"; text: string };
+import { ExtensionMessageType } from "./messages";
+type InsertMessage = { type: ExtensionMessageType.InsertText; text: string };
 
 let lastEditable: HTMLElement | null = null;
 
@@ -6,7 +7,7 @@ document.addEventListener("focusin", (event) => {
   if (event.target instanceof HTMLElement && isEditable(event.target)) {
     lastEditable = event.target;
     void chrome.runtime
-      .sendMessage({ type: "editable.focused" })
+      .sendMessage({ type: ExtensionMessageType.EditableFocused })
       .catch(() => undefined);
   }
 });
@@ -39,7 +40,7 @@ function isInsertMessage(value: unknown): value is InsertMessage {
     value !== null &&
     typeof value === "object" &&
     "type" in value &&
-    value.type === "insert-text" &&
+    value.type === ExtensionMessageType.InsertText &&
     "text" in value &&
     typeof value.text === "string"
   );

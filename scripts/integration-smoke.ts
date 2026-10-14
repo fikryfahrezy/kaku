@@ -1,4 +1,5 @@
 import {
+  MessageType,
   encodeClientMessage,
   parseServerMessage,
   type ServerMessage,
@@ -13,11 +14,11 @@ let unrelatedDelivery = false;
 let extensionSocket!: WebSocket;
 
 extensionSocket = await openSocket(pairA.token, (message) => {
-  if (message.type === "pairing.completed") pairingCompleted = true;
-  if (message.type === "text.delivery") {
+  if (message.type === MessageType.PairingCompleted) pairingCompleted = true;
+  if (message.type === MessageType.TextDelivery) {
     extensionSocket.send(
       encodeClientMessage({
-        type: "delivery.ack",
+        type: MessageType.DeliveryAck,
         messageId: message.messageId,
         delivered: true,
       }),
@@ -25,7 +26,7 @@ extensionSocket = await openSocket(pairA.token, (message) => {
   }
 });
 const unrelatedSocket = await openSocket(pairB.token, (message) => {
-  if (message.type === "text.delivery") unrelatedDelivery = true;
+  if (message.type === MessageType.TextDelivery) unrelatedDelivery = true;
 });
 
 const claimResponse = await fetch(`${baseUrl}/api/pairings/claim`, {
@@ -52,16 +53,16 @@ const delivered = timeout(
   "delivery acknowledgement",
 );
 const ipadSocket = await openSocket(claim.token, (message) => {
-  if (message.type === "presence.changed" && message.extensionOnline)
+  if (message.type === MessageType.PresenceChanged && message.extensionOnline)
     resolvePresence();
-  if (message.type === "delivery.result" && message.delivered)
+  if (message.type === MessageType.DeliveryResult && message.delivered)
     resolveDelivery();
 });
 await presence;
 
 ipadSocket.send(
   encodeClientMessage({
-    type: "text.deliver",
+    type: MessageType.TextDeliver,
     messageId: crypto.randomUUID(),
     text: "日本語",
   }),

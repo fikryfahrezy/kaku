@@ -1,9 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { positiveInteger, rateLimitConfig } from "../src/config";
+import {
+  RateLimitScope,
+  positiveInteger,
+  rateLimitConfig,
+} from "../src/config";
 
 describe("rate limit configuration", () => {
   test("uses defaults", () => {
-    expect(rateLimitConfig({}, "PAIRING", 8, 3_600)).toEqual({
+    expect(rateLimitConfig({}, RateLimitScope.Pairing, 8, 3_600)).toEqual({
       maximum: 8,
       windowMs: 3_600_000,
     });
@@ -16,7 +20,7 @@ describe("rate limit configuration", () => {
           PAIRING_RATE_LIMIT_MAX: "12",
           PAIRING_RATE_LIMIT_WINDOW_SECONDS: "120",
         },
-        "PAIRING",
+        RateLimitScope.Pairing,
         8,
         3_600,
       ),

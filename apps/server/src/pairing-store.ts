@@ -2,10 +2,10 @@ import { Database } from "bun:sqlite";
 import { createHash, createHmac, randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import type {
+import {
   DeviceRole,
-  PairingClaimResponse,
-  PairingRequestResponse,
+  type PairingClaimResponse,
+  type PairingRequestResponse,
 } from "@kaku/protocol";
 
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
@@ -53,7 +53,7 @@ export class PairingStore {
       CREATE TABLE IF NOT EXISTS devices (
         id TEXT PRIMARY KEY,
         pairing_id TEXT NOT NULL REFERENCES pairings(id) ON DELETE CASCADE,
-        role TEXT NOT NULL CHECK(role IN ('writer', 'extension')),
+        role TEXT NOT NULL CHECK(role IN ('${DeviceRole.Writer}', '${DeviceRole.Extension}')),
         token_hash TEXT NOT NULL UNIQUE,
         created_at INTEGER NOT NULL,
         last_seen_at INTEGER,
@@ -79,8 +79,14 @@ export class PairingStore {
             [id, this.codeHash(code), now, now + CODE_TTL_MS],
           );
           this.database.run(
-            "INSERT INTO devices (id, pairing_id, role, token_hash, created_at) VALUES (?, ?, 'extension', ?, ?)",
-            [crypto.randomUUID(), id, tokenHash(token), now],
+            "INSERT INTO devices (id, pairing_id, role, token_hash, created_at) VALUES (?, ?, ?, ?, ?)",
+            [
+              crypto.randomUUID(),
+              id,
+              DeviceRole.Extension,
+              tokenHash(token),
+              now,
+            ],
           );
         })();
         return {
@@ -117,8 +123,14 @@ export class PairingStore {
         if (updated.changes !== 1)
           throw new Error("Pairing code was already used");
         this.database.run(
-          "INSERT INTO devices (id, pairing_id, role, token_hash, created_at) VALUES (?, ?, 'writer', ?, ?)",
-          [crypto.randomUUID(), pairing.id, tokenHash(token), now],
+          "INSERT INTO devices (id, pairing_id, role, token_hash, created_at) VALUES (?, ?, ?, ?, ?)",
+          [
+            crypto.randomUUID(),
+            pairing.id,
+            DeviceRole.Writer,
+            tokenHash(token),
+            now,
+          ],
         );
       })();
       return { token };
@@ -202,7 +214,7 @@ export class PairingStore {
           CREATE TABLE devices (
             id TEXT PRIMARY KEY,
             pairing_id TEXT NOT NULL REFERENCES pairings(id) ON DELETE CASCADE,
-            role TEXT NOT NULL CHECK(role IN ('writer', 'extension')),
+            role TEXT NOT NULL CHECK(role IN ('${DeviceRole.Writer}', '${DeviceRole.Extension}')),
             token_hash TEXT NOT NULL UNIQUE,
             created_at INTEGER NOT NULL,
             last_seen_at INTEGER,
@@ -210,7 +222,7 @@ export class PairingStore {
             UNIQUE(pairing_id, role)
           );
           INSERT INTO devices (id, pairing_id, role, token_hash, created_at, last_seen_at, revoked_at)
-          SELECT id, pairing_id, CASE role WHEN 'ipad' THEN 'writer' ELSE role END,
+          SELECT id, pairing_id, CASE role WHEN 'ipad' THEN '${DeviceRole.Writer}' ELSE role END,
                  token_hash, created_at, last_seen_at, revoked_at
           FROM devices_legacy_writer_role;
           DROP TABLE devices_legacy_writer_role;

@@ -18,7 +18,7 @@ export function positiveInteger(
 
 export function rateLimitConfig(
   environment: Record<string, string | undefined>,
-  prefix: "PAIRING" | "CLAIM" | "WEBSOCKET",
+  prefix: RateLimitScope,
   defaultMaximum: number,
   defaultWindowSeconds: number,
 ): RateLimitConfig {
@@ -37,4 +37,9 @@ export function rateLimitConfig(
         windowName,
       ) * 1_000,
   };
+}
+export enum RateLimitScope {
+  Pairing = "PAIRING",
+  Claim = "CLAIM",
+  Websocket = "WEBSOCKET",
 }

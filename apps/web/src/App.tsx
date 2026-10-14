@@ -8,26 +8,48 @@ import {
   onMount,
 } from "solid-js";
 import {
+  MessageType,
   encodeClientMessage,
   parseServerMessage,
-  type ConnectionState,
-  type DeliveryError,
+  ConnectionState,
+  DeliveryError,
 } from "@kaku/protocol";
 import { WritingCanvas } from "./WritingCanvas";
 import { createId } from "./id";
-import type { InkStroke, RecognitionResult, WritingTool } from "./ink-types";
+import {
+  type InkStroke,
+  type RecognitionResult,
+  WritingTool,
+} from "./ink-types";
 import { LocalRecognizer } from "./recognizer";
 import { segmentStrokes } from "./segmentation";
+
+enum InputMode {
+  Write = "write",
+  Type = "type",
+}
+
+enum ConfirmationSide {
+  Left = "left",
+  Right = "right",
+}
+
+enum DeliveryState {
+  Idle = "idle",
+  Sending = "sending",
+  Delivered = "delivered",
+  Failed = "failed",
+}
 
 const TOKEN_KEY = "kaku.device-token";
 const AUTO_SEND_KEY = "kaku.auto-send";
 const AUTO_SEND_DELAY_MS = 1_500;
 
 const stateLabel: Record<ConnectionState, string> = {
-  connecting: "Connecting",
-  connected: "Connected",
-  reconnecting: "Reconnecting",
-  disconnected: "Offline",
+  [ConnectionState.Connecting]: "Connecting",
+  [ConnectionState.Connected]: "Connected",
+  [ConnectionState.Reconnecting]: "Reconnecting",
+  [ConnectionState.Disconnected]: "Offline",
 };
 
 function websocketUrl(token: string): string {
@@ -42,11 +64,12 @@ export function App() {
   const [pairingCode, setPairingCode] = createSignal("");
   const [pairingError, setPairingError] = createSignal("");
   const [pairingBusy, setPairingBusy] = createSignal(false);
-  const [connection, setConnection] =
-    createSignal<ConnectionState>("disconnected");
+  const [connection, setConnection] = createSignal<ConnectionState>(
+    ConnectionState.Disconnected,
+  );
   const [extensionOnline, setExtensionOnline] = createSignal(false);
   const [feedback, setFeedback] = createSignal("");
-  const [tool, setTool] = createSignal<WritingTool>("pen");
+  const [tool, setTool] = createSignal<WritingTool>(WritingTool.Pen);
   const [strokes, setStrokes] = createSignal<InkStroke[]>([]);
   const [undoStack, setUndoStack] = createSignal<InkStroke[][]>([]);
   const [redoStack, setRedoStack] = createSignal<InkStroke[][]>([]);
@@ -58,13 +81,12 @@ export function App() {
   const [autoSend, setAutoSend] = createSignal(
     localStorage.getItem(AUTO_SEND_KEY) === "true",
   );
-  const [inputMode, setInputMode] = createSignal<"write" | "type">("write");
-  const [confirmationSide, setConfirmationSide] = createSignal<
-    "left" | "right"
-  >("right");
-  const [deliveryState, setDeliveryState] = createSignal<
-    "idle" | "sending" | "delivered" | "failed"
-  >("idle");
+  const [inputMode, setInputMode] = createSignal<InputMode>(InputMode.Write);
+  const [confirmationSide, setConfirmationSide] =
+    createSignal<ConfirmationSide>(ConfirmationSide.Right);
+  const [deliveryState, setDeliveryState] = createSignal<DeliveryState>(
+    DeliveryState.Idle,
+  );
   const [pendingDelivery, setPendingDelivery] = createSignal<{
     messageId: string;
     text: string;
@@ -132,9 +154,11 @@ export function App() {
   createEffect(() => {
     const enabled = autoSend();
     const text = confirmedText().trim();
-    const ready = connection() === "connected" && extensionOnline();
-    const busy = deliveryState() === "sending";
-    const waitingForRecognition = inputMode() === "write" && recognizing();
+    const ready =
+      connection() === ConnectionState.Connected && extensionOnline();
+    const busy = deliveryState() === DeliveryState.Sending;
+    const waitingForRecognition =
+      inputMode() === InputMode.Write && recognizing();
     if (!text) {
       lastSentText = "";
       return;
@@ -191,28 +215,31 @@ export function App() {
     if (!credential || disposed) return;
     intentionalClose = false;
     setConnection(
-      connection() === "disconnected" ? "connecting" : "reconnecting",
+      connection() === ConnectionState.Disconnected
+        ? ConnectionState.Connecting
+        : ConnectionState.Reconnecting,
     );
     socket = new WebSocket(websocketUrl(credential));
     socket.addEventListener("open", () => {
-      setConnection("connected");
+      setConnection(ConnectionState.Connected);
       heartbeatTimer = window.setInterval(() => {
         if (socket?.readyState === WebSocket.OPEN)
-          socket.send(encodeClientMessage({ type: "ping" }));
+          socket.send(encodeClientMessage({ type: MessageType.Ping }));
       }, 25_000);
     });
     socket.addEventListener("message", (event) => {
       const message = parseServerMessage(event.data);
       if (!message) return;
-      if (message.type === "connection.ready") setConnection("connected");
-      if (message.type === "presence.changed") {
+      if (message.type === MessageType.ConnectionReady)
+        setConnection(ConnectionState.Connected);
+      if (message.type === MessageType.PresenceChanged) {
         setExtensionOnline(message.extensionOnline);
         if (!message.extensionOnline)
           setFeedback(
             "Your paired browser is offline. Writing and local recognition still work.",
           );
       }
-      if (message.type === "delivery.result")
+      if (message.type === MessageType.DeliveryResult)
         handleDeliveryResult(
           message.messageId,
           message.delivered,
@@ -228,7 +255,7 @@ export function App() {
         clearLocalSession("This pairing was revoked or is no longer valid.");
         return;
       }
-      setConnection("reconnecting");
+      setConnection(ConnectionState.Reconnecting);
       reconnectTimer = window.setTimeout(connect, 2_500);
     });
   }
@@ -292,7 +319,7 @@ export function App() {
   function clearLocalSession(message: string): void {
     localStorage.removeItem(TOKEN_KEY);
     setToken("");
-    setConnection("disconnected");
+    setConnection(ConnectionState.Disconnected);
     setExtensionOnline(false);
     setPairingError(message);
   }
@@ -301,7 +328,7 @@ export function App() {
     setUndoStack((stack) => [...stack.slice(-49), structuredClone(previous)]);
     setRedoStack([]);
     setStrokes(next);
-    setDeliveryState("idle");
+    setDeliveryState(DeliveryState.Idle);
   }
 
   function undo(): void {
@@ -351,9 +378,11 @@ export function App() {
         : { messageId: createId(), text };
     setPendingDelivery(delivery);
     lastSentText = delivery.text;
-    setDeliveryState("sending");
+    setDeliveryState(DeliveryState.Sending);
     setFeedback("Sending confirmed text…");
-    socket.send(encodeClientMessage({ type: "text.deliver", ...delivery }));
+    socket.send(
+      encodeClientMessage({ type: MessageType.TextDeliver, ...delivery }),
+    );
   }
 
   function handleDeliveryResult(
@@ -363,17 +392,18 @@ export function App() {
   ): void {
     if (pendingDelivery()?.messageId !== messageId) return;
     if (delivered) {
-      setDeliveryState("delivered");
+      setDeliveryState(DeliveryState.Delivered);
       setFeedback("Replaced the focused field in your paired browser.");
     } else {
-      setDeliveryState("failed");
+      setDeliveryState(DeliveryState.Failed);
       const labels: Record<DeliveryError, string> = {
-        no_focused_field:
+        [DeliveryError.NoFocusedField]:
           "Focus an input, textarea, or editable area in your paired browser, then retry.",
-        page_restricted:
+        [DeliveryError.PageRestricted]:
           "This browser page blocks extension insertion. Open a regular webpage and retry.",
-        peer_offline: "Your paired browser is offline. Reconnect it and retry.",
-        delivery_timeout:
+        [DeliveryError.PeerOffline]:
+          "Your paired browser is offline. Reconnect it and retry.",
+        [DeliveryError.DeliveryTimeout]:
           "Your paired browser did not acknowledge delivery. Check its connection and retry.",
       };
       setFeedback(
@@ -410,7 +440,7 @@ export function App() {
             <small>1.5s idle</small>
           </span>
         </label>
-        <Show when={deliveryState() === "failed"}>
+        <Show when={deliveryState() === DeliveryState.Failed}>
           <button
             class="retry-button"
             type="button"
@@ -425,15 +455,15 @@ export function App() {
           type="button"
           disabled={
             !confirmedText().trim() ||
-            connection() !== "connected" ||
+            connection() !== ConnectionState.Connected ||
             !extensionOnline() ||
-            deliveryState() === "sending"
+            deliveryState() === DeliveryState.Sending
           }
           onClick={() => sendText(false)}
         >
-          {deliveryState() === "sending"
+          {deliveryState() === DeliveryState.Sending
             ? "Sending…"
-            : deliveryState() === "delivered"
+            : deliveryState() === DeliveryState.Delivered
               ? "Send again"
               : "Send to receiver"}
           <span aria-hidden="true">↗</span>
@@ -513,20 +543,20 @@ export function App() {
           <div class="mode-bar">
             <div class="mode-tabs" role="tablist" aria-label="Input method">
               <button
-                classList={{ active: inputMode() === "write" }}
-                onClick={() => setInputMode("write")}
+                classList={{ active: inputMode() === InputMode.Write }}
+                onClick={() => setInputMode(InputMode.Write)}
                 type="button"
                 role="tab"
-                aria-selected={inputMode() === "write"}
+                aria-selected={inputMode() === InputMode.Write}
               >
                 Handwrite
               </button>
               <button
-                classList={{ active: inputMode() === "type" }}
-                onClick={() => setInputMode("type")}
+                classList={{ active: inputMode() === InputMode.Type }}
+                onClick={() => setInputMode(InputMode.Type)}
                 type="button"
                 role="tab"
-                aria-selected={inputMode() === "type"}
+                aria-selected={inputMode() === InputMode.Type}
               >
                 Type
               </button>
@@ -541,7 +571,7 @@ export function App() {
           </div>
 
           <Show
-            when={inputMode() === "write"}
+            when={inputMode() === InputMode.Write}
             fallback={
               <section class="typed-fallback">
                 <div class="typed-field-heading">
@@ -575,18 +605,18 @@ export function App() {
                 <div class="canvas-toolbar">
                   <div class="tool-group" aria-label="Writing tools">
                     <button
-                      classList={{ active: tool() === "pen" }}
-                      onClick={() => setTool("pen")}
+                      classList={{ active: tool() === WritingTool.Pen }}
+                      onClick={() => setTool(WritingTool.Pen)}
                       type="button"
-                      aria-pressed={tool() === "pen"}
+                      aria-pressed={tool() === WritingTool.Pen}
                     >
                       Pen
                     </button>
                     <button
-                      classList={{ active: tool() === "eraser" }}
-                      onClick={() => setTool("eraser")}
+                      classList={{ active: tool() === WritingTool.Eraser }}
+                      onClick={() => setTool(WritingTool.Eraser)}
                       type="button"
-                      aria-pressed={tool() === "eraser"}
+                      aria-pressed={tool() === WritingTool.Eraser}
                     >
                       Eraser
                     </button>
@@ -644,18 +674,28 @@ export function App() {
                     aria-label="Confirmation panel position"
                   >
                     <button
-                      classList={{ active: confirmationSide() === "left" }}
+                      classList={{
+                        active: confirmationSide() === ConfirmationSide.Left,
+                      }}
                       type="button"
-                      aria-pressed={confirmationSide() === "left"}
-                      onClick={() => setConfirmationSide("left")}
+                      aria-pressed={
+                        confirmationSide() === ConfirmationSide.Left
+                      }
+                      onClick={() => setConfirmationSide(ConfirmationSide.Left)}
                     >
                       Left
                     </button>
                     <button
-                      classList={{ active: confirmationSide() === "right" }}
+                      classList={{
+                        active: confirmationSide() === ConfirmationSide.Right,
+                      }}
                       type="button"
-                      aria-pressed={confirmationSide() === "right"}
-                      onClick={() => setConfirmationSide("right")}
+                      aria-pressed={
+                        confirmationSide() === ConfirmationSide.Right
+                      }
+                      onClick={() =>
+                        setConfirmationSide(ConfirmationSide.Right)
+                      }
                     >
                       Right
                     </button>

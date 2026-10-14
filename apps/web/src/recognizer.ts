@@ -1,3 +1,4 @@
+import { RecognitionMessageType } from "./recognition-messages";
 import type { CharacterGroup, RecognitionResult } from "./ink-types";
 import { createId } from "./id";
 
@@ -18,7 +19,7 @@ export class LocalRecognizer {
       "message",
       (
         event: MessageEvent<{
-          type: "result" | "error";
+          type: RecognitionMessageType.Result | RecognitionMessageType.Error;
           requestId: string;
           result?: RecognitionResult;
           error?: string;
@@ -27,7 +28,10 @@ export class LocalRecognizer {
         const pending = this.pending.get(event.data.requestId);
         if (!pending) return;
         this.pending.delete(event.data.requestId);
-        if (event.data.type === "result" && event.data.result)
+        if (
+          event.data.type === RecognitionMessageType.Result &&
+          event.data.result
+        )
           pending.resolve(event.data.result);
         else
           pending.reject(
@@ -53,7 +57,7 @@ export class LocalRecognizer {
     return new Promise((resolve, reject) => {
       this.pending.set(requestId, { resolve, reject });
       this.worker.postMessage({
-        type: "recognize",
+        type: RecognitionMessageType.Recognize,
         requestId,
         groups,
         width,

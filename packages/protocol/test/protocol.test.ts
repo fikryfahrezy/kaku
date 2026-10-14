@@ -1,7 +1,47 @@
 import { describe, expect, test } from "bun:test";
-import { parseClientMessage, parseServerMessage } from "../src";
+import {
+  DeliveryError,
+  MessageType,
+  ProtocolErrorCode,
+  encodeClientMessage,
+  encodeServerMessage,
+  parseClientMessage,
+  parseServerMessage,
+} from "../src";
 
 describe("protocol parsing", () => {
+  test("enum messages preserve wire values and round trip", () => {
+    const ack = {
+      type: MessageType.DeliveryAck,
+      messageId: "wire-test",
+      delivered: false,
+      error: DeliveryError.NoFocusedField,
+    } as const;
+    const encoded = encodeClientMessage(ack);
+    expect(JSON.parse(encoded)).toEqual({
+      type: "delivery.ack",
+      messageId: "wire-test",
+      delivered: false,
+      error: "no_focused_field",
+    });
+    expect(parseClientMessage(encoded)).toEqual(ack);
+
+    const error = {
+      type: MessageType.ProtocolError,
+      code: ProtocolErrorCode.RateLimited,
+    } as const;
+    const encodedError = encodeServerMessage(error);
+    expect(JSON.parse(encodedError)).toEqual({
+      type: "protocol.error",
+      code: "rate_limited",
+    });
+    expect(parseServerMessage(encodedError)).toEqual(error);
+    expect(
+      parseServerMessage({ type: "protocol.error", code: "unknown" }),
+    ).toBeUndefined();
+    expect(parseClientMessage({ ...ack, error: "unknown" })).toBeUndefined();
+  });
+
   test("accepts delivery and acknowledgement messages", () => {
     expect(
       parseClientMessage(

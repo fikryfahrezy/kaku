@@ -1,11 +1,6 @@
+import { PointerKind, WritingTool } from "./ink-types";
 import { createEffect, onCleanup, onMount } from "solid-js";
-import type {
-  InkBounds,
-  InkPoint,
-  InkStroke,
-  PointerKind,
-  WritingTool,
-} from "./ink-types";
+import type { InkBounds, InkPoint, InkStroke } from "./ink-types";
 import { createId } from "./id";
 import { WRITING_CELL_SIZE } from "./segmentation";
 
@@ -45,9 +40,13 @@ export function WritingCanvas(props: WritingCanvasProps) {
   onCleanup(() => observer?.disconnect());
 
   const pointerDown = (event: PointerEvent) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
+    if (event.pointerType === PointerKind.Mouse && event.button !== 0) return;
     if (activePointer !== undefined) {
-      if (event.pointerType !== "pen" || activePointerType === "pen") return;
+      if (
+        event.pointerType !== PointerKind.Pen ||
+        activePointerType === PointerKind.Pen
+      )
+        return;
 
       // A palm touch can arrive just before the Pencil. Discard that gesture
       // and let the higher-precision pen pointer take ownership of the canvas.
@@ -64,7 +63,7 @@ export function WritingCanvas(props: WritingCanvasProps) {
     activePointer = event.pointerId;
     activePointerType = event.pointerType;
     beforeGesture = structuredClone(working);
-    if (props.tool === "eraser") {
+    if (props.tool === WritingTool.Eraser) {
       eraseAt(event);
       return;
     }
@@ -83,7 +82,7 @@ export function WritingCanvas(props: WritingCanvasProps) {
   const pointerMove = (event: PointerEvent) => {
     if (event.pointerId !== activePointer) return;
     event.preventDefault();
-    if (props.tool === "eraser") {
+    if (props.tool === WritingTool.Eraser) {
       for (const sample of event.getCoalescedEvents?.() ?? [event])
         eraseAt(sample);
       return;
@@ -138,7 +137,7 @@ export function WritingCanvas(props: WritingCanvasProps) {
       pressure:
         event.pressure > 0
           ? event.pressure
-          : event.pointerType === "mouse"
+          : event.pointerType === PointerKind.Mouse
             ? 0.5
             : 0.35,
       time: performance.timeOrigin + event.timeStamp,
@@ -247,7 +246,9 @@ export function WritingCanvas(props: WritingCanvasProps) {
 }
 
 function pointerKind(value: string): PointerKind {
-  return value === "pen" || value === "touch" ? value : "mouse";
+  return value === PointerKind.Pen || value === PointerKind.Touch
+    ? value
+    : PointerKind.Mouse;
 }
 
 function clamp(value: number): number {

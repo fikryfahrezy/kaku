@@ -1,27 +1,16 @@
 import {
+  ExtensionConnectionState,
+  ExtensionMessageType,
+  type ExtensionState,
+} from "./messages";
+import {
+  MessageType,
   encodeClientMessage,
   parseServerMessage,
-  type DeliveryError,
+  DeliveryError,
 } from "@kaku/protocol";
 
 declare const __KAKU_DEFAULT_SERVER_URL__: string;
-
-type ExtensionConnectionState =
-  | "not-paired"
-  | "waiting"
-  | "connecting"
-  | "online"
-  | "reconnecting"
-  | "error";
-
-interface ExtensionState {
-  serverUrl: string;
-  token?: string;
-  pairingCode?: string;
-  pairingExpiresAt?: string;
-  connectionState: ExtensionConnectionState;
-  lastError?: string;
-}
 
 type StatePatch = {
   [Key in keyof ExtensionState]?: ExtensionState[Key] | undefined;
@@ -35,7 +24,7 @@ interface FocusedFrame {
 
 const defaults: ExtensionState = {
   serverUrl: __KAKU_DEFAULT_SERVER_URL__,
-  connectionState: "not-paired",
+  connectionState: ExtensionConnectionState.NotPaired,
 };
 
 let socket: WebSocket | undefined;
@@ -85,9 +74,11 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, respond) => {
 void restoreConnection();
 
 async function handlePopupMessage(message: PopupMessage): Promise<unknown> {
-  if (message.type === "state.get") return getState();
-  if (message.type === "pairing.request") return requestPairing();
-  if (message.type === "server.save") return saveServer(message.serverUrl);
+  if (message.type === ExtensionMessageType.StateGet) return getState();
+  if (message.type === ExtensionMessageType.PairingRequest)
+    return requestPairing();
+  if (message.type === ExtensionMessageType.ServerSave)
+    return saveServer(message.serverUrl);
   await unpair();
   return getState();
 }
@@ -124,7 +115,7 @@ async function requestPairing(): Promise<ExtensionState> {
     token: result.token,
     pairingCode: result.code,
     pairingExpiresAt: result.expiresAt,
-    connectionState: "waiting",
+    connectionState: ExtensionConnectionState.Waiting,
   };
   await replaceState(next);
   connect(next);
@@ -137,7 +128,10 @@ async function saveServer(rawUrl: string): Promise<ExtensionState> {
   closeSocket();
   if (previous.token && previous.serverUrl !== serverUrl)
     await revokeRemote(previous).catch(() => undefined);
-  const next: ExtensionState = { serverUrl, connectionState: "not-paired" };
+  const next: ExtensionState = {
+    serverUrl,
+    connectionState: ExtensionConnectionState.NotPaired,
+  };
   await replaceState(next);
   return next;
 }
@@ -148,7 +142,7 @@ async function unpair(): Promise<void> {
   await revokeRemote(state).catch(() => undefined);
   await replaceState({
     serverUrl: state.serverUrl,
-    connectionState: "not-paired",
+    connectionState: ExtensionConnectionState.NotPaired,
   });
 }
 
@@ -171,7 +165,7 @@ async function restoreConnection(): Promise<void> {
     await revokeRemote(state).catch(() => undefined);
     await replaceState({
       serverUrl: state.serverUrl,
-      connectionState: "not-paired",
+      connectionState: ExtensionConnectionState.NotPaired,
       lastError: "The pairing code expired. Request a new one.",
     });
     return;
@@ -187,10 +181,10 @@ function connect(state: ExtensionState): void {
   void updateState({
     connectionState:
       reconnectAttempt > 0
-        ? "reconnecting"
+        ? ExtensionConnectionState.Reconnecting
         : state.pairingCode
-          ? "waiting"
-          : "connecting",
+          ? ExtensionConnectionState.Waiting
+          : ExtensionConnectionState.Connecting,
   });
   const connection = new WebSocket(url);
   socket = connection;
@@ -198,12 +192,14 @@ function connect(state: ExtensionState): void {
     if (socket !== connection) return;
     reconnectAttempt = 0;
     void updateState({
-      connectionState: state.pairingCode ? "waiting" : "online",
+      connectionState: state.pairingCode
+        ? ExtensionConnectionState.Waiting
+        : ExtensionConnectionState.Online,
       lastError: undefined,
     });
     heartbeat = setInterval(() => {
       if (socket === connection && connection.readyState === WebSocket.OPEN) {
-        connection.send(encodeClientMessage({ type: "ping" }));
+        connection.send(encodeClientMessage({ type: MessageType.Ping }));
       }
     }, 25_000);
   });
@@ -218,7 +214,7 @@ function connect(state: ExtensionState): void {
       void getState().then((current) =>
         replaceState({
           serverUrl: current.serverUrl,
-          connectionState: "not-paired",
+          connectionState: ExtensionConnectionState.NotPaired,
           lastError: "Pairing was revoked or expired.",
         }),
       );
@@ -226,7 +222,7 @@ function connect(state: ExtensionState): void {
     }
     reconnectAttempt += 1;
     void updateState({
-      connectionState: "reconnecting",
+      connectionState: ExtensionConnectionState.Reconnecting,
       lastError: "Connection lost. Reconnecting…",
     });
     reconnectTimer = setTimeout(
@@ -237,7 +233,7 @@ function connect(state: ExtensionState): void {
   connection.addEventListener("error", () => {
     if (socket === connection)
       void updateState({
-        connectionState: "error",
+        connectionState: ExtensionConnectionState.Error,
         lastError: "Cannot reach the Kaku server.",
       });
   });
@@ -249,42 +245,44 @@ async function handleServerMessage(
 ): Promise<void> {
   const message = parseServerMessage(value);
   if (!message) return;
-  if (message.type === "connection.ready") {
+  if (message.type === MessageType.ConnectionReady) {
     const state = await getState();
     if (!message.paired && !state.pairingCode) {
       await revokeRemote(state).catch(() => undefined);
       closeSocket();
       await replaceState({
         serverUrl: state.serverUrl,
-        connectionState: "not-paired",
+        connectionState: ExtensionConnectionState.NotPaired,
         lastError:
           "The previous pairing code is unavailable. Request a new one.",
       });
       return;
     }
     await updateState({
-      connectionState: message.paired ? "online" : "waiting",
+      connectionState: message.paired
+        ? ExtensionConnectionState.Online
+        : ExtensionConnectionState.Waiting,
       ...(message.paired
         ? { pairingCode: undefined, pairingExpiresAt: undefined }
         : {}),
     });
     return;
   }
-  if (message.type === "pairing.completed") {
+  if (message.type === MessageType.PairingCompleted) {
     await updateState({
-      connectionState: "online",
+      connectionState: ExtensionConnectionState.Online,
       pairingCode: undefined,
       pairingExpiresAt: undefined,
       lastError: undefined,
     });
     return;
   }
-  if (message.type !== "text.delivery") return;
+  if (message.type !== MessageType.TextDelivery) return;
   if (await wasDelivered(message.messageId)) {
     if (socket === connection && connection.readyState === WebSocket.OPEN) {
       connection.send(
         encodeClientMessage({
-          type: "delivery.ack",
+          type: MessageType.DeliveryAck,
           messageId: message.messageId,
           delivered: true,
         }),
@@ -297,7 +295,7 @@ async function handleServerMessage(
   if (socket === connection && connection.readyState === WebSocket.OPEN) {
     connection.send(
       encodeClientMessage({
-        type: "delivery.ack",
+        type: MessageType.DeliveryAck,
         messageId: message.messageId,
         delivered: result.delivered,
         ...(result.error ? { error: result.error } : {}),
@@ -333,7 +331,8 @@ async function insertIntoFocusedPage(
     active: true,
     currentWindow: true,
   });
-  if (!activeTab?.id) return { delivered: false, error: "no_focused_field" };
+  if (!activeTab?.id)
+    return { delivered: false, error: DeliveryError.NoFocusedField };
   const destination =
     focusedFrame?.tabId === activeTab.id &&
     Date.now() - focusedFrame.focusedAt < 30 * 60_000
@@ -342,14 +341,14 @@ async function insertIntoFocusedPage(
   try {
     const response = await chrome.tabs.sendMessage(
       activeTab.id,
-      { type: "insert-text", text },
+      { type: ExtensionMessageType.InsertText, text },
       destination,
     );
     return response?.inserted
       ? { delivered: true }
-      : { delivered: false, error: "no_focused_field" };
+      : { delivered: false, error: DeliveryError.NoFocusedField };
   } catch {
-    return { delivered: false, error: "page_restricted" };
+    return { delivered: false, error: DeliveryError.PageRestricted };
   }
 }
 
@@ -379,7 +378,7 @@ async function updateState(patch: StatePatch): Promise<void> {
   }
   await chrome.storage.local.set(state);
   await chrome.runtime
-    .sendMessage({ type: "state.changed", state })
+    .sendMessage({ type: ExtensionMessageType.StateChanged, state })
     .catch(() => undefined);
 }
 
@@ -387,7 +386,7 @@ async function replaceState(state: ExtensionState): Promise<void> {
   await chrome.storage.local.clear();
   await chrome.storage.local.set(state);
   await chrome.runtime
-    .sendMessage({ type: "state.changed", state })
+    .sendMessage({ type: ExtensionMessageType.StateChanged, state })
     .catch(() => undefined);
 }
 
@@ -402,31 +401,33 @@ function normalizeServerUrl(value: string): string {
 }
 
 type PopupMessage =
-  | { type: "state.get" }
-  | { type: "pairing.request" }
-  | { type: "server.save"; serverUrl: string }
-  | { type: "pairing.unpair" };
+  | { type: ExtensionMessageType.StateGet }
+  | { type: ExtensionMessageType.PairingRequest }
+  | { type: ExtensionMessageType.ServerSave; serverUrl: string }
+  | { type: ExtensionMessageType.PairingUnpair };
 
 function isPopupMessage(value: unknown): value is PopupMessage {
   if (!value || typeof value !== "object" || !("type" in value)) return false;
   if (
-    value.type === "state.get" ||
-    value.type === "pairing.request" ||
-    value.type === "pairing.unpair"
+    value.type === ExtensionMessageType.StateGet ||
+    value.type === ExtensionMessageType.PairingRequest ||
+    value.type === ExtensionMessageType.PairingUnpair
   )
     return true;
   return (
-    value.type === "server.save" &&
+    value.type === ExtensionMessageType.ServerSave &&
     "serverUrl" in value &&
     typeof value.serverUrl === "string"
   );
 }
 
-function isFocusMessage(value: unknown): value is { type: "editable.focused" } {
+function isFocusMessage(
+  value: unknown,
+): value is { type: ExtensionMessageType.EditableFocused } {
   return (
     !!value &&
     typeof value === "object" &&
     "type" in value &&
-    value.type === "editable.focused"
+    value.type === ExtensionMessageType.EditableFocused
   );
 }

@@ -1,3 +1,4 @@
+import { PointerKind } from "../src/ink-types";
 import { describe, expect, test } from "bun:test";
 import type { InkStroke, RecognizedGroup } from "../src/ink-types";
 import { segmentStrokes, sentenceSuggestions } from "../src/segmentation";
@@ -5,7 +6,7 @@ import { segmentStrokes, sentenceSuggestions } from "../src/segmentation";
 function stroke(id: string, x: number, y: number): InkStroke {
   return {
     id,
-    pointer: "pen",
+    pointer: PointerKind.Pen,
     startedAt: 1,
     endedAt: 2,
     bounds: { minX: x, minY: y, maxX: x + 0.02, maxY: y + 0.02 },

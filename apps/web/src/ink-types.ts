@@ -1,5 +1,13 @@
-export type WritingTool = "pen" | "eraser";
-export type PointerKind = "pen" | "touch" | "mouse";
+export enum WritingTool {
+  Pen = "pen",
+  Eraser = "eraser",
+}
+
+export enum PointerKind {
+  Pen = "pen",
+  Touch = "touch",
+  Mouse = "mouse",
+}
 
 export interface InkPoint {
   x: number;
