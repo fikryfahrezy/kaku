@@ -20,9 +20,9 @@ export default defineConfig({
   server: {
     proxy: {
       // "/api": "http://127.0.0.1:3000",
-      "/api": "http://kaku.fahrezy.work",
+      "/api": "https://kaku.fahrezy.work",
       // "/healthz": "http://127.0.0.1:3000",
-      "/healthz": "http://kaku.fahrezy.work",
+      "/healthz": "https://kaku.fahrezy.work",
       "/ws": {
         // target: "ws://127.0.0.1:3000",
         target: "wss://kaku.fahrezy.work",

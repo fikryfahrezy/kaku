@@ -38,7 +38,7 @@
   --color-text-card-footer: #79837f;
   --color-text-coming-soon: #78827e;
   --color-text-footer-landing: #7d8783;
-  --color-text-tertiary: #858070;
+  --color-text-tertiary: #756f62;
   --color-text-status: #87908c;
   --color-text-hero-note: #84908b;
   --color-text-footer: #8a918e;
@@ -191,9 +191,10 @@ button {
 .eyebrow {
   margin: 0 0 18px;
   color: var(--color-primary);
-  font-size: 0.69rem;
+  font-size: 10px;
   font-weight: 500;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
   text-transform: uppercase;
 }
 
@@ -343,28 +344,26 @@ h2 {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
-  gap: 22px;
-  padding: 14px 18px;
-  border: 0;
+  justify-content: space-between;
+  gap: 30px;
+  min-height: 44px;
+  padding: 13px 17px;
+  border: 1px solid var(--color-action);
   border-radius: 0;
-  color: var(--color-white);
+  color: var(--color-surface);
   background: var(--color-action);
   cursor: pointer;
-  font-size: 0.7rem;
-  transition:
-    transform 160ms ease,
-    background 160ms ease,
-    opacity 160ms ease;
+  font-size: 10px;
 }
 
 .send-button:hover:not(:disabled) {
+  border-color: var(--color-primary);
   background: var(--color-primary);
-  transform: translateY(-1px);
 }
 
 .send-button:disabled {
   cursor: not-allowed;
-  opacity: 0.34;
+  opacity: 0.45;
 }
 
 .setup-note {
@@ -501,12 +500,12 @@ h2 {
   color: var(--landing-ink);
   background:
     radial-gradient(
-      circle at 89% 10%,
-      rgba(var(--color-primary-rgb), 0.08),
-      transparent 28rem
+      circle at 10% 5%,
+      rgba(var(--color-primary-rgb), 0.055),
+      transparent 35rem
     ),
     linear-gradient(
-      rgba(var(--color-landing-ink-rgb), 0.022) 1px,
+      rgba(var(--color-landing-ink-rgb), 0.025) 1px,
       transparent 1px
     ),
     var(--color-paper);
@@ -527,7 +526,7 @@ h2 {
 }
 
 .landing-nav {
-  min-height: 92px;
+  min-height: 96px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -541,9 +540,9 @@ h2 {
 }
 
 .landing-nav nav a {
-  color: var(--color-text-nav);
+  color: var(--color-text-secondary);
   text-decoration: none;
-  font-size: 0.68rem;
+  font-size: 11px;
 }
 
 .landing-nav nav a:hover {
@@ -553,17 +552,17 @@ h2 {
 .landing-nav .nav-cta {
   display: inline-flex;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
   padding: 12px 15px;
+  font-size: 10px;
   border: 1px solid var(--landing-ink);
   color: var(--landing-ink);
 }
 
 .landing-hero {
-  min-height: calc(100vh - 92px);
-  min-height: calc(100dvh - 92px);
+  min-height: min(720px, calc(100dvh - 96px));
   display: grid;
-  grid-template-columns: minmax(470px, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(32px, 4vw, 64px);
   align-items: center;
   padding: clamp(36px, 5.5vh, 68px) 0;
@@ -578,10 +577,9 @@ h2 {
 .landing-hero h1 {
   max-width: 660px;
   margin-bottom: 28px;
-  font-size: clamp(3.4rem, 5.5vw, 5.5rem);
-  font-size: clamp(3.4rem, min(5.5vw, 8.25dvh), 5.5rem);
-  line-height: 0.91;
-  letter-spacing: -0.065em;
+  font-size: clamp(52px, 6.3vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
 }
 
 .landing-hero h1 em {
@@ -593,8 +591,8 @@ h2 {
   margin-bottom: 31px;
   color: var(--color-text-secondary);
   font-family: system-ui, sans-serif;
-  font-size: clamp(0.98rem, 1.5vw, 1.08rem);
-  line-height: 1.72;
+  font-size: 15px;
+  line-height: 1.85;
 }
 
 .hero-actions {
@@ -606,24 +604,19 @@ h2 {
 
 .primary-action {
   display: inline-flex;
-  min-height: 52px;
+  min-height: 50px;
   align-items: center;
   justify-content: space-between;
   gap: 34px;
   padding: 0 19px;
-  color: var(--color-white);
+  color: var(--color-surface);
   background: var(--landing-ink);
   text-decoration: none;
-  font-size: 0.72rem;
-  box-shadow: 0 12px 28px rgba(var(--color-landing-ink-rgb), 0.13);
-  transition:
-    transform 160ms ease,
-    background 160ms ease;
+  font-size: 11px;
 }
 
 .primary-action:hover {
   background: var(--landing-red);
-  transform: translateY(-2px);
 }
 
 .text-action {
@@ -631,8 +624,8 @@ h2 {
   align-items: center;
   gap: 9px;
   padding: 8px 0;
-  color: var(--color-text-nav);
-  font-size: 0.64rem;
+  color: var(--color-text-secondary);
+  font-size: 10px;
   text-decoration: none;
   border-bottom: 1px solid rgba(var(--color-landing-ink-rgb), 0.28);
 }
@@ -769,23 +762,19 @@ h2 {
 
 .download-action {
   display: flex;
-  min-height: 52px;
+  min-height: 50px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
   padding: 0 18px;
-  color: var(--color-white);
+  color: var(--color-surface);
   background: var(--landing-ink);
   font-size: 0.7rem;
   text-decoration: none;
-  transition:
-    background 160ms ease,
-    transform 160ms ease;
 }
 
 .download-action:hover {
   background: var(--landing-red);
-  transform: translateY(-2px);
 }
 
 .install-steps {
@@ -829,7 +818,7 @@ h2 {
   padding: 2px 4px;
   color: var(--landing-ink);
   background: rgba(var(--color-landing-ink-rgb), 0.06);
-  font-size: 0.72rem;
+  font-size: 11px;
 }
 
 .install-steps a {
@@ -880,9 +869,9 @@ h2 {
     "Yu Mincho",
     Iowan Old Style,
     serif;
-  font-size: clamp(2.3rem, 4.5vw, 4.7rem);
-  font-weight: 600;
-  line-height: 1.03;
+  font-size: clamp(35px, 4.5vw, 55px);
+  font-weight: 500;
+  line-height: 1.05;
   letter-spacing: -0.045em;
 }
 
@@ -979,14 +968,15 @@ h2 {
 }
 
 .final-cta {
-  padding: 112px 24px 120px;
-  color: var(--color-paper-inverse);
-  background: var(--landing-ink);
+  padding: 72px 24px 85px;
+  border-top: 1px solid var(--landing-line);
+  color: var(--landing-ink);
+  background: rgba(var(--color-surface-rgb), 0.36);
   text-align: center;
 }
 
 .final-cta .eyebrow {
-  color: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .final-cta h2 {
@@ -994,9 +984,13 @@ h2 {
 }
 
 .primary-action--light {
-  border: 1px solid rgba(var(--color-white-rgb), 0.68);
-  background: transparent;
-  box-shadow: none;
+  border: 1px solid var(--landing-ink);
+  background: var(--landing-ink);
+  color: var(--color-surface);
+}
+
+.primary-action--light:hover {
+  border-color: var(--landing-red);
 }
 
 .landing-footer {
@@ -1364,7 +1358,7 @@ h2 {
 
 .mode-tabs button.active,
 .canvas-toolbar button.active {
-  color: var(--color-white);
+  color: var(--color-surface);
   background: var(--color-action);
 }
 
@@ -1426,7 +1420,7 @@ h2 {
 
 .canvas-toolbar button:disabled {
   cursor: not-allowed;
-  opacity: 0.34;
+  opacity: 0.45;
 }
 
 .history-tools button + button {
@@ -1486,7 +1480,7 @@ h2 {
 
 .danger-text-button:disabled {
   cursor: not-allowed;
-  opacity: 0.34;
+  opacity: 0.45;
 }
 
 .danger-text-button:focus-visible {
@@ -1557,7 +1551,7 @@ h2 {
 }
 
 .panel-side-toggle button.active {
-  color: var(--color-white);
+  color: var(--color-surface);
   background: var(--color-action);
 }
 
@@ -1785,7 +1779,7 @@ h2 {
 }
 
 .retry-button:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
 }
 
 .unpair-button {
@@ -1901,4 +1895,57 @@ h2 {
   font-size: 0.75rem;
   color: inherit;
   text-underline-offset: 0.2em;
+}
+
+/* Shared keyboard treatment follows Tsuzuru's controls. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
+
+/* Landing identity follows Tsuzuru; the app keeps its compact mark. */
+.landing-nav .brand {
+  gap: 13px;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.landing-nav .brand-mark {
+  width: 43px;
+  height: 43px;
+  font-size: 27px;
+}
+
+.brand-caption {
+  display: block;
+  margin-top: 5px;
+  color: var(--color-text-tertiary);
+  font-size: 8px;
+  letter-spacing: 0.13em;
+}
+
+.mode-tabs button:hover:not(:disabled),
+.canvas-toolbar button:hover:not(:disabled),
+.panel-side-toggle button:hover:not(:disabled),
+.retry-button:hover:not(:disabled),
+.sentence-suggestions button:hover:not(:disabled) {
+  color: var(--color-primary);
+}
+
+.mode-tabs button.active,
+.canvas-toolbar button.active,
+.panel-side-toggle button.active {
+  color: var(--color-primary);
+  background: rgba(var(--color-primary-rgb), 0.07);
+  box-shadow: inset 0 -1px rgba(var(--color-primary-rgb), 0.25);
+}
+
+@media (max-width: 640px) {
+  .brand-caption {
+    font-size: 7px;
+  }
 }
