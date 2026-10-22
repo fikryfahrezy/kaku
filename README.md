@@ -4,7 +4,7 @@ Handwrite Japanese on one device, confirm the text, and send it to the currently
 
 ## Requirements
 
-- [Bun](https://bun.sh/) 1.3.14 or newer
+- [Bun](https://bun.sh/) 1.4.3 or newer
 - Docker with Compose for container deployment
 
 ## Workspaces
