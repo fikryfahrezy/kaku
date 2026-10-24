@@ -1,54 +1,108 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#e3ded0" />
-    <meta name="color-scheme" content="light" />
-    <meta
-      name="description"
-      content="Handwrite Japanese on one device, choose the matching text, and send it to any input in your paired browser."
-    />
-    <meta name="robots" content="index,follow" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="Kaku — Write here, use it anywhere" />
-    <meta
-      property="og:description"
-      content="Handwrite Japanese on one device and send the matched text to your paired browser."
-    />
-    <meta property="og:locale" content="en_US" />
-    <meta name="twitter:card" content="summary" />
-    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.ico" sizes="64x64" />
-    <link rel="icon" href="/icon.png" type="image/png" sizes="512x512" />
-    <link rel="apple-touch-icon" href="/icon.png" />
-    <link rel="stylesheet" href="/src/styles.css" />
-    <script
-      defer
-      src="https://analytics.fahrezy.work/script.js"
-      data-website-id="3443101f-e301-48fd-935a-ec8b5c6c50eb"
-    ></script>
-    <title>Kaku — Write Japanese here, use it anywhere</title>
-  </head>
-  <body>
+import { createSignal, onMount } from "solid-js";
+import { PageHead } from "../PageHead";
+import "../styles.css";
+
+const LATEST_RELEASE_URL =
+  "https://github.com/fikryfahrezy/kaku/releases/latest";
+
+interface ReleaseAsset {
+  name: string;
+  browser_download_url?: string;
+}
+
+interface Release {
+  tag_name?: unknown;
+  assets?: unknown;
+}
+
+async function fetchLatestRelease(): Promise<Release | undefined> {
+  try {
+    const response = await fetch(
+      "https://api.github.com/repos/fikryfahrezy/kaku/releases/latest",
+      { headers: { Accept: "application/vnd.github+json" } },
+    );
+    if (!response.ok) return undefined;
+    return (await response.json()) as Release;
+  } catch {
+    // Keep the latest release page as a usable fallback.
+    return undefined;
+  }
+}
+
+function Brand(props: { caption?: boolean }) {
+  return (
+    <a class="brand" href="/" aria-label="Kaku home">
+      <span class="brand-mark" lang="ja" aria-hidden="true">
+        書
+      </span>
+      {props.caption ? (
+        <span>
+          Kaku
+          <span class="brand-caption">JAPANESE HANDWRITING INPUT</span>
+        </span>
+      ) : (
+        <span>Kaku</span>
+      )}
+    </a>
+  );
+}
+
+export default function Landing() {
+  // Fetch in the browser so the prerendered page never pins a stale release.
+  const [release, setRelease] = createSignal<Release>();
+  onMount(() => void fetchLatestRelease().then(setRelease));
+
+  const releaseLabel = () => {
+    const tag = release()?.tag_name;
+    return typeof tag === "string" ? tag : "Latest release";
+  };
+
+  const assetUrl = (prefix: string) => {
+    const assets = release()?.assets;
+    if (!Array.isArray(assets)) return LATEST_RELEASE_URL;
+    const asset = (assets as ReleaseAsset[]).find(
+      ({ name }) => name.startsWith(prefix) && name.endsWith(".zip"),
+    );
+    return asset?.browser_download_url ?? LATEST_RELEASE_URL;
+  };
+
+  return (
     <div class="landing-shell">
+      <PageHead
+        title="Kaku — Write Japanese here, use it anywhere"
+        meta={[
+          {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1, viewport-fit=cover",
+          },
+          { name: "theme-color", content: "#e3ded0" },
+          {
+            name: "description",
+            content:
+              "Handwrite Japanese on one device, choose the matching text, and send it to any input in your paired browser.",
+          },
+          { name: "robots", content: "index,follow" },
+          { property: "og:type", content: "website" },
+          {
+            property: "og:title",
+            content: "Kaku — Write here, use it anywhere",
+          },
+          {
+            property: "og:description",
+            content:
+              "Handwrite Japanese on one device and send the matched text to your paired browser.",
+          },
+          { property: "og:locale", content: "en_US" },
+          { name: "twitter:card", content: "summary" },
+        ]}
+      />
       <header class="landing-nav">
-        <a class="brand" href="/" aria-label="Kaku home">
-          <span class="brand-mark" lang="ja" aria-hidden="true">書</span>
-          <span>
-            Kaku
-            <span class="brand-caption">JAPANESE HANDWRITING INPUT</span>
-          </span>
-        </a>
+        <Brand caption />
         <nav aria-label="Main navigation">
           <a href="#download">Get the extension</a>
           <a href="#how-it-works">How it works</a>
           <a class="nav-cta" href="/app/">
-            Open writing pad
-            <span aria-hidden="true">↗</span>
+            Open writing pad <span aria-hidden="true">↗</span>
           </a>
         </nav>
       </header>
@@ -60,7 +114,7 @@
             <h1 id="hero-title">
               Write Japanese
               <br />
-              on one device.
+              on one device.{" "}
               <em>
                 Use it
                 <br />
@@ -74,23 +128,21 @@
             </p>
             <div class="hero-actions">
               <a class="primary-action" href="/app/">
-                Open the writing pad
-                <span aria-hidden="true">→</span>
+                Open the writing pad <span aria-hidden="true">→</span>
               </a>
               <a class="text-action" href="#download">
-                <span class="availability-dot" aria-hidden="true"></span>
-                Download the browser receiver
-                <span aria-hidden="true">↓</span>
+                <span class="availability-dot" aria-hidden="true" />
+                Download the browser receiver <span aria-hidden="true">↓</span>
               </a>
             </div>
             <p class="hero-note">
-              <span aria-hidden="true">✓</span>
-              Recognition runs locally on your writing device.
+              <span aria-hidden="true">✓</span> Recognition runs locally on your
+              writing device.
             </p>
           </div>
 
           <div class="product-scene">
-            <div class="sun-disc" aria-hidden="true"></div>
+            <div class="sun-disc" aria-hidden="true" />
             <figure class="app-preview-frame">
               <img
                 src="/app-preview.png"
@@ -110,9 +162,7 @@
         >
           <div class="section-heading extension-heading">
             <div>
-              <p class="eyebrow" id="release-label">
-                Browser receivers · Latest release
-              </p>
+              <p class="eyebrow">Browser receivers · {releaseLabel()}</p>
               <h2 id="download-title">
                 Install the other half
                 <br />
@@ -138,12 +188,10 @@
 
               <a
                 class="download-action"
-                href="https://github.com/fikryfahrezy/kaku/releases/latest"
-                data-release-asset="kaku-chromium-"
-                download
+                href={assetUrl("kaku-chromium-")}
+                download=""
               >
-                Download for Chromium
-                <span aria-hidden="true">↓</span>
+                Download for Chromium <span aria-hidden="true">↓</span>
               </a>
 
               <ol class="install-steps">
@@ -157,23 +205,17 @@
                 <li>
                   <span>02</span>
                   <p>
-                    Open
-                    <code>chrome://extensions</code>
-                    . Use
-                    <code>edge://extensions</code>
-                    or
-                    <code>brave://extensions</code>
-                    in those browsers.
+                    Open <code>chrome://extensions</code>. Use{" "}
+                    <code>edge://extensions</code> or{" "}
+                    <code>brave://extensions</code> in those browsers.
                   </p>
                 </li>
                 <li>
                   <span>03</span>
                   <p>
-                    Turn on
-                    <strong>Developer mode</strong>
-                    , choose
-                    <strong>Load unpacked</strong>
-                    , and select the extracted folder.
+                    Turn on <strong>Developer mode</strong>, choose{" "}
+                    <strong>Load unpacked</strong>, and select the extracted
+                    folder.
                   </p>
                 </li>
                 <li>
@@ -197,31 +239,25 @@
 
               <a
                 class="download-action"
-                href="https://github.com/fikryfahrezy/kaku/releases/latest"
-                data-release-asset="kaku-firefox-"
-                download
+                href={assetUrl("kaku-firefox-")}
+                download=""
               >
-                Download for Firefox
-                <span aria-hidden="true">↓</span>
+                Download for Firefox <span aria-hidden="true">↓</span>
               </a>
 
               <ol class="install-steps">
                 <li>
                   <span>01</span>
                   <p>
-                    Download and extract the ZIP, then open
-                    <code>about:debugging#/runtime/this-firefox</code>
-                    .
+                    Download and extract the ZIP, then open{" "}
+                    <code>about:debugging#/runtime/this-firefox</code>.
                   </p>
                 </li>
                 <li>
                   <span>02</span>
                   <p>
-                    Choose
-                    <strong>Load Temporary Add-on</strong>
-                    and select
-                    <code>manifest.json</code>
-                    inside the extracted folder.
+                    Choose <strong>Load Temporary Add-on</strong> and select{" "}
+                    <code>manifest.json</code> inside the extracted folder.
                   </p>
                 </li>
                 <li>
@@ -235,20 +271,15 @@
                   <span>04</span>
                   <p>
                     For a permanent install, use the signed XPI when it is
-                    available on the
-                    <a
-                      href="https://github.com/fikryfahrezy/kaku/releases/latest"
-                    >
-                      latest release
-                    </a>
-                    .
+                    available on the{" "}
+                    <a href={LATEST_RELEASE_URL}>latest release</a>.
                   </p>
                 </li>
               </ol>
 
               <p class="browser-note">
-                <span aria-hidden="true">!</span>
-                Unsigned temporary add-ons are removed when Firefox restarts.
+                <span aria-hidden="true">!</span> Unsigned temporary add-ons are
+                removed when Firefox restarts.
               </p>
             </article>
           </div>
@@ -270,7 +301,9 @@
           <ol class="steps">
             <li>
               <span class="step-number">01</span>
-              <span class="step-kanji" aria-hidden="true">書</span>
+              <span class="step-kanji" aria-hidden="true">
+                書
+              </span>
               <h3>Write naturally</h3>
               <p>
                 Write kanji, hiragana, or katakana with a stylus, touch, or
@@ -279,7 +312,9 @@
             </li>
             <li>
               <span class="step-number">02</span>
-              <span class="step-kanji" aria-hidden="true">選</span>
+              <span class="step-kanji" aria-hidden="true">
+                選
+              </span>
               <h3>Confirm the text</h3>
               <p>
                 Review local recognition candidates, choose a suggestion, or
@@ -288,7 +323,9 @@
             </li>
             <li>
               <span class="step-number">03</span>
-              <span class="step-kanji" aria-hidden="true">送</span>
+              <span class="step-kanji" aria-hidden="true">
+                送
+              </span>
               <h3>Send and continue</h3>
               <p>
                 Deliver manually or automatically to the focused field in your
@@ -299,7 +336,9 @@
         </section>
 
         <section class="privacy-panel" aria-labelledby="privacy-title">
-          <span class="privacy-stamp" aria-hidden="true">私</span>
+          <span class="privacy-stamp" aria-hidden="true">
+            私
+          </span>
           <div>
             <p class="eyebrow">Built for your own server</p>
             <h2 id="privacy-title">A private path between your devices.</h2>
@@ -319,50 +358,20 @@
             sentence in motion.
           </h2>
           <a class="primary-action primary-action--light" href="/app/">
-            Open the writing pad
-            <span aria-hidden="true">→</span>
+            Open the writing pad <span aria-hidden="true">→</span>
           </a>
         </section>
       </main>
 
       <footer class="landing-footer">
-        <a class="brand" href="/" aria-label="Kaku home">
-          <span class="brand-mark" lang="ja" aria-hidden="true">書</span>
-          <span>Kaku</span>
-        </a>
+        <Brand />
         <p>Handwrite on one device. Continue on another.</p>
-        <a href="/licenses/">Open-source licenses</a>
+        {/* A full load keeps the landing styles from leaking into that page. */}
+        <a href="/licenses/" rel="external">
+          Open-source licenses
+        </a>
         <span>Browser handwriting input · 2026</span>
       </footer>
     </div>
-    <script>
-      fetch("https://api.github.com/repos/fikryfahrezy/kaku/releases/latest", {
-        headers: { Accept: "application/vnd.github+json" },
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("Latest release was unavailable");
-          return response.json();
-        })
-        .then((release) => {
-          if (!Array.isArray(release.assets)) return;
-
-          document.querySelectorAll("[data-release-asset]").forEach((link) => {
-            const prefix = link.dataset.releaseAsset;
-            const asset = release.assets.find(
-              ({ name }) => name.startsWith(prefix) && name.endsWith(".zip"),
-            );
-            if (asset?.browser_download_url)
-              link.href = asset.browser_download_url;
-          });
-
-          if (typeof release.tag_name === "string") {
-            document.querySelector("#release-label").textContent =
-              `Browser receivers · ${release.tag_name}`;
-          }
-        })
-        .catch(() => {
-          // Keep the latest release page as a usable fallback.
-        });
-    </script>
-  </body>
-</html>
+  );
+}

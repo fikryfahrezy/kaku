@@ -4,7 +4,11 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
-    "types": ["vite/client"]
+    "types": ["vite/client", "@solidjs/start/env"],
+    "paths": {
+      "~/*": ["./src/*"]
+    },
+    "skipLibCheck": true
   },
   "include": ["src", "vite.config.ts"]
 }

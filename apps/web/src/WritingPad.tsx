@@ -59,7 +59,7 @@ function websocketUrl(token: string): string {
   return url.href;
 }
 
-export function App() {
+export function WritingPad() {
   const [token, setToken] = createSignal(localStorage.getItem(TOKEN_KEY) ?? "");
   const [pairingCode, setPairingCode] = createSignal("");
   const [pairingError, setPairingError] = createSignal("");

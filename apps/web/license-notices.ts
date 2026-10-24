@@ -40,6 +40,9 @@ export function licenseNotices() {
     return {
       name: "kaku-license-notices",
       apply: "build",
+      // Only browser bundles ship to users; skip the prerender server build.
+      applyToEnvironment: (environment) =>
+        worker || environment.name === "client",
       buildStart() {
         if (!worker) packages.clear();
       },

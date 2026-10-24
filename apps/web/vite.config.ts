@@ -1,22 +1,33 @@
 import { defineConfig } from "vite";
-import solid from "vite-plugin-solid";
-import { resolve } from "node:path";
+import { solidStart } from "@solidjs/start/config";
+import { nitro } from "nitro/vite";
 import { licenseNotices } from "./license-notices";
 
 const notices = licenseNotices();
 
-export default defineConfig({
-  plugins: [solid(), notices.main],
-  worker: { plugins: () => [notices.worker()] },
-  build: {
-    rollupOptions: {
-      input: {
-        landing: resolve("index.html"),
-        app: resolve("app/index.html"),
-        licenses: resolve("licenses/index.html"),
-      },
-    },
+export default defineConfig(({ command }) => ({
+  plugins: [solidStart(), nitro(), notices.main],
+  worker: {
+    plugins: () => [notices.worker()],
+    // Nitro's buildAssetsDir does not reach worker bundles.
+    rolldownOptions: { output: { entryFileNames: "assets/[name]-[hash].js" } },
   },
+  // Dev serves from source; a build output dir in dev would shadow the routes.
+  nitro:
+    command === "build"
+      ? {
+          preset: "static",
+          // apps/server serves these files, so emit them where it already looks.
+          output: { dir: ".output", publicDir: "dist" },
+          // Keep hashed files under /assets/, which the server caches as immutable.
+          buildAssetsDir: "assets",
+          prerender: {
+            routes: ["/", "/app/", "/licenses/"],
+            crawlLinks: false,
+            failOnError: true,
+          },
+        }
+      : {},
   server: {
     proxy: {
       // "/api": "http://127.0.0.1:3000",
@@ -30,4 +41,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));

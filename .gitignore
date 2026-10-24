@@ -71,3 +71,4 @@ apps/*/dist/
 coverage/
 data/
 *.tsbuildinfo
+.output/
