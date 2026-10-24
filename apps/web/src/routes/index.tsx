@@ -1,6 +1,9 @@
 import { createSignal, onMount } from "solid-js";
+import { LandingStory } from "../LandingStory";
+import type { LandingStoryHandle } from "../LandingStory";
 import { PageHead } from "../PageHead";
 import "../styles.css";
+import "../landing.css";
 
 const LATEST_RELEASE_URL =
   "https://github.com/fikryfahrezy/kaku/releases/latest";
@@ -51,6 +54,7 @@ export default function Landing() {
   // Fetch in the browser so the prerendered page never pins a stale release.
   const [release, setRelease] = createSignal<Release>();
   onMount(() => void fetchLatestRelease().then(setRelease));
+  let story: LandingStoryHandle | undefined;
 
   const releaseLabel = () => {
     const tag = release()?.tag_name;
@@ -96,64 +100,24 @@ export default function Landing() {
           { name: "twitter:card", content: "summary" },
         ]}
       />
+      <a class="skip-link" href="#main">
+        Skip to content
+      </a>
       <header class="landing-nav">
         <Brand caption />
         <nav aria-label="Main navigation">
+          <button type="button" onClick={() => story?.jump(1.6)}>
+            How it works
+          </button>
           <a href="#download">Get the extension</a>
-          <a href="#how-it-works">How it works</a>
           <a class="nav-cta" href="/app/">
             Open writing pad <span aria-hidden="true">↗</span>
           </a>
         </nav>
       </header>
 
-      <main>
-        <section class="landing-hero" aria-labelledby="hero-title">
-          <div class="hero-copy">
-            <p class="eyebrow">Japanese input across your devices</p>
-            <h1 id="hero-title">
-              Write Japanese
-              <br />
-              on one device.{" "}
-              <em>
-                Use it
-                <br />
-                on another.
-              </em>
-            </h1>
-            <p class="hero-lede">
-              Handwrite a word or a whole sentence, confirm the locally
-              recognized text, and send it straight to the focused field in your
-              paired browser.
-            </p>
-            <div class="hero-actions">
-              <a class="primary-action" href="/app/">
-                Open the writing pad <span aria-hidden="true">→</span>
-              </a>
-              <a class="text-action" href="#download">
-                <span class="availability-dot" aria-hidden="true" />
-                Download the browser receiver <span aria-hidden="true">↓</span>
-              </a>
-            </div>
-            <p class="hero-note">
-              <span aria-hidden="true">✓</span> Recognition runs locally on your
-              writing device.
-            </p>
-          </div>
-
-          <div class="product-scene">
-            <div class="sun-disc" aria-hidden="true" />
-            <figure class="app-preview-frame">
-              <img
-                src="/app-preview.png"
-                width="1573"
-                height="1000"
-                alt="Kaku writing pad showing handwritten Japanese, recognition candidates, and confirmed text"
-                fetchpriority="high"
-              />
-            </figure>
-          </div>
-        </section>
+      <main id="main">
+        <LandingStory ref={(handle) => (story = handle)} />
 
         <section
           class="extension-download"
@@ -283,83 +247,6 @@ export default function Landing() {
               </p>
             </article>
           </div>
-        </section>
-
-        <section
-          class="process"
-          id="how-it-works"
-          aria-labelledby="process-title"
-        >
-          <div class="section-heading">
-            <p class="eyebrow">A simple handoff</p>
-            <h2 id="process-title">
-              From ink to input
-              <br />
-              in three small steps.
-            </h2>
-          </div>
-          <ol class="steps">
-            <li>
-              <span class="step-number">01</span>
-              <span class="step-kanji" aria-hidden="true">
-                書
-              </span>
-              <h3>Write naturally</h3>
-              <p>
-                Write kanji, hiragana, or katakana with a stylus, touch, or
-                mouse—or switch to typing whenever you prefer.
-              </p>
-            </li>
-            <li>
-              <span class="step-number">02</span>
-              <span class="step-kanji" aria-hidden="true">
-                選
-              </span>
-              <h3>Confirm the text</h3>
-              <p>
-                Review local recognition candidates, choose a suggestion, or
-                edit the result yourself.
-              </p>
-            </li>
-            <li>
-              <span class="step-number">03</span>
-              <span class="step-kanji" aria-hidden="true">
-                送
-              </span>
-              <h3>Send and continue</h3>
-              <p>
-                Deliver manually or automatically to the focused field in your
-                paired Chromium or Firefox browser.
-              </p>
-            </li>
-          </ol>
-        </section>
-
-        <section class="privacy-panel" aria-labelledby="privacy-title">
-          <span class="privacy-stamp" aria-hidden="true">
-            私
-          </span>
-          <div>
-            <p class="eyebrow">Built for your own server</p>
-            <h2 id="privacy-title">A private path between your devices.</h2>
-          </div>
-          <p>
-            Raw strokes stay on the writing device. Self-host the relay and keep
-            the handoff on infrastructure you control, with no paid cloud
-            dependency.
-          </p>
-        </section>
-
-        <section class="final-cta" aria-labelledby="cta-title">
-          <p class="eyebrow">Ready when you are</p>
-          <h2 id="cta-title">
-            Put your next Japanese
-            <br />
-            sentence in motion.
-          </h2>
-          <a class="primary-action primary-action--light" href="/app/">
-            Open the writing pad <span aria-hidden="true">→</span>
-          </a>
         </section>
       </main>
 
