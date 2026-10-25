@@ -18,17 +18,27 @@
   transform: none;
 }
 
+/* The header sits on the first screen and scrolls away with the story. */
 .landing-nav {
-  position: fixed;
+  position: absolute;
   z-index: 20;
   top: 0;
-  left: 50%;
-  width: min(1180px, calc(100% - 48px));
-  min-height: 84px;
-  border-bottom: 0;
-  translate: -50% 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 22px max(24px, calc((100% - 1180px) / 2));
 }
 
+.landing-nav nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-left: auto;
+}
+
+.landing-nav nav a,
 .landing-nav nav button {
   padding: 0;
   border: 0;
@@ -36,15 +46,28 @@
   background: none;
   cursor: pointer;
   font-size: 11px;
+  text-decoration: none;
 }
 
+.landing-nav nav a:hover,
 .landing-nav nav button:hover {
   color: var(--landing-red);
 }
 
 .landing-nav .nav-cta {
-  background: rgba(var(--color-surface-rgb), 0.6);
-  backdrop-filter: blur(6px);
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  padding: 12px 15px;
+  border: 1px solid var(--landing-ink);
+  color: var(--landing-ink);
+  font-size: 10px;
+  text-decoration: none;
+}
+
+.landing-nav .nav-cta:hover {
+  border-color: var(--landing-red);
+  color: var(--landing-red);
 }
 
 .extension-download {
@@ -1561,20 +1584,16 @@
 
 @media (max-width: 760px) {
   .landing-nav {
-    width: calc(100% - 32px);
-    min-height: 70px;
+    padding: 14px 16px;
   }
 
-  .landing-nav nav > button {
+  .landing-nav .brand-name,
+  .landing-nav nav {
     display: none;
   }
 
-  .landing-nav::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    inset: 0 -16px -18px;
-    background: linear-gradient(var(--color-paper) 60%, transparent);
+  .landing-nav .nav-cta {
+    margin-left: auto;
   }
 
   .veil {

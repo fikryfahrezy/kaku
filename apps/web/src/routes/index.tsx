@@ -39,7 +39,7 @@ function Brand(props: { caption?: boolean }) {
         書
       </span>
       {props.caption ? (
-        <span>
+        <span class="brand-name">
           Kaku
           <span class="brand-caption">JAPANESE HANDWRITING INPUT</span>
         </span>
@@ -110,10 +110,10 @@ export default function Landing() {
             How it works
           </button>
           <a href="#download">Get the extension</a>
-          <a class="nav-cta" href="/app/">
-            Open writing pad <span aria-hidden="true">↗</span>
-          </a>
         </nav>
+        <a class="nav-cta" href="/app/">
+          Open writing pad <span aria-hidden="true">↗</span>
+        </a>
       </header>
 
       <main id="main">
