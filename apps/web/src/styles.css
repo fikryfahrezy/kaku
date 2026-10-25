@@ -7,7 +7,6 @@
   --color-success: #407d65;
   --color-success-rgb: 64, 125, 101;
   --color-success-strong: #3d745c;
-  --color-success-soft: #47745f;
   --color-warning: #c28a40;
   --color-danger: #a6402d;
 
@@ -40,7 +39,6 @@
   --color-text-footer-landing: #7d8783;
   --color-text-tertiary: #756f62;
   --color-text-status: #87908c;
-  --color-text-hero-note: #84908b;
   --color-text-footer: #8a918e;
   --color-text-device: #8b918e;
   --color-text-danger-muted: #8b6b62;
@@ -493,7 +491,7 @@ h2 {
 .landing-shell {
   --landing-ink: var(--color-landing-ink);
   --landing-red: var(--color-primary);
-  --landing-line: rgba(var(--color-landing-ink-rgb), 0.15);
+  --landing-line: rgba(var(--color-landing-ink-rgb), 0.16);
   min-height: 100vh;
   min-height: 100dvh;
   overflow: hidden;
@@ -533,41 +531,60 @@ h2 {
 .hero-actions {
   display: flex;
   align-items: center;
-  gap: 23px;
+  gap: 24px;
   flex-wrap: wrap;
 }
 
 .primary-action {
   display: inline-flex;
-  min-height: 50px;
+  min-height: 52px;
   align-items: center;
-  justify-content: space-between;
-  gap: 34px;
-  padding: 0 19px;
+  justify-content: center;
+  gap: 36px;
+  padding-inline: 22px;
+  border: 1px solid var(--landing-ink);
   color: var(--color-surface);
   background: var(--landing-ink);
   text-decoration: none;
   font-size: 11px;
+  font-weight: 500;
+  transition:
+    background 0.25s,
+    border-color 0.25s;
 }
 
-.primary-action:hover {
+.primary-action:hover,
+.download-action:hover {
+  border-color: var(--landing-red);
   background: var(--landing-red);
+}
+
+.primary-action span,
+.download-action span {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primary-action:hover span {
+  transform: translateX(4px);
+}
+
+/* Download arrows point down, so they nudge down. */
+.download-action:hover span {
+  transform: translateY(3px);
 }
 
 .text-action {
   display: inline-flex;
-  align-items: center;
-  gap: 9px;
+  gap: 10px;
   padding: 8px 0;
   color: var(--color-text-secondary);
   font-size: 10px;
   text-decoration: none;
-  border-bottom: 1px solid rgba(var(--color-landing-ink-rgb), 0.28);
+  border-bottom: 1px solid rgba(var(--color-landing-ink-rgb), 0.16);
 }
 
 .text-action:hover {
   color: var(--landing-red);
-  border-color: var(--landing-red);
 }
 
 .availability-dot {
@@ -646,21 +663,23 @@ h2 {
   font-size: 0.52rem;
 }
 
+/* Full card width, otherwise the same treatment as .primary-action. */
 .download-action {
   display: flex;
-  min-height: 50px;
+  min-height: 52px;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 0 18px;
+  padding-inline: 22px;
+  border: 1px solid var(--landing-ink);
   color: var(--color-surface);
   background: var(--landing-ink);
-  font-size: 0.7rem;
+  font-size: 11px;
+  font-weight: 500;
   text-decoration: none;
-}
-
-.download-action:hover {
-  background: var(--landing-red);
+  transition:
+    background 0.25s,
+    border-color 0.25s;
 }
 
 .install-steps {
@@ -747,6 +766,7 @@ h2 {
     "Hiragino Mincho ProN",
     "Yu Mincho",
     Iowan Old Style,
+    Georgia,
     serif;
   font-size: clamp(35px, 4.5vw, 55px);
   font-weight: 500;
@@ -755,20 +775,30 @@ h2 {
 }
 
 .landing-footer {
-  min-height: 125px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  color: var(--color-text-footer-landing);
-  font-size: 0.58rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px 24px;
+  padding: 28px 0 36px;
+  border-top: 1px solid rgba(var(--color-landing-ink-rgb), 0.16);
+  color: var(--color-text-tertiary);
+  font-size: 9px;
+  letter-spacing: 0.12em;
 }
 
-.landing-footer > p {
-  margin: 0;
+.landing-footer nav {
+  display: flex;
+  gap: 24px;
 }
 
-.landing-footer > span {
-  justify-self: end;
+.landing-footer a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.landing-footer a:hover {
+  color: var(--landing-red);
 }
 
 @keyframes blink {
@@ -820,12 +850,8 @@ h2 {
   }
 
   .landing-footer {
-    min-height: 145px;
-    grid-template-columns: 1fr auto;
-  }
-
-  .landing-footer > p {
-    display: none;
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -1553,15 +1579,16 @@ textarea:focus-visible {
 /* Landing identity follows Tsuzuru; the app keeps its compact mark. */
 .landing-nav .brand {
   gap: 13px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
   letter-spacing: -0.04em;
 }
 
 .landing-nav .brand-mark {
-  width: 43px;
-  height: 43px;
-  font-size: 27px;
+  width: 40px;
+  height: 40px;
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", ui-serif, serif;
+  font-size: 25px;
 }
 
 .brand-caption {

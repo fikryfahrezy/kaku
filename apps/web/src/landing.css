@@ -3,19 +3,24 @@
   overflow: clip;
 }
 
+html:has(.landing-shell) {
+  scroll-behavior: smooth;
+}
+
 .skip-link {
   position: fixed;
-  z-index: 30;
-  top: 10px;
-  left: 10px;
-  padding: 12px;
-  color: var(--landing-ink);
-  background: var(--color-surface);
-  transform: translateY(-200%);
+  z-index: 1000;
+  top: 12px;
+  left: 12px;
+  padding: 10px 14px;
+  color: var(--color-paper-contrast);
+  background: var(--landing-ink);
+  text-decoration: none;
+  transform: translateY(-150%);
 }
 
 .skip-link:focus {
-  transform: none;
+  transform: translateY(0);
 }
 
 /* The header sits on the first screen and scrolls away with the story. */
@@ -107,6 +112,7 @@
   font:
     min(58vh, 44vw) / 1 "Hiragino Mincho ProN",
     "Yu Mincho",
+    ui-serif,
     serif;
   opacity: 0;
   transform: translateY(6%) scale(0.96);
@@ -140,8 +146,8 @@
   z-index: 3;
   pointer-events: none;
   border: calc(2px * var(--inverse, 1)) solid var(--color-primary);
-  box-shadow: 0 0 0 calc(10px * var(--inverse, 1))
-    rgba(var(--color-primary-rgb), 0.1);
+  box-shadow: 0 0 0 200vmax rgba(var(--color-ink-rgb), 0.32);
+  opacity: 0;
   transition:
     transform 0.5s cubic-bezier(0.65, 0, 0.35, 1),
     width 0.5s cubic-bezier(0.65, 0, 0.35, 1),
@@ -251,13 +257,33 @@
   z-index: 6;
 }
 
+.landing-shell h1 {
+  font-family:
+    "Hiragino Mincho ProN",
+    "Yu Mincho",
+    Iowan Old Style,
+    Georgia,
+    serif;
+  font-weight: 500;
+}
+
+.landing-shell .eyebrow {
+  margin-bottom: 20px;
+}
+
 .hero {
   position: absolute;
   top: 50%;
   left: max(24px, calc((100vw - 1180px) / 2));
+  /* Wider and smaller than GenkouYoushi's hero so "Use it on another." stays on one line. */
   width: min(620px, 46vw);
-  margin-top: 10px;
+  margin-top: -10px;
   translate: 0 -50%;
+}
+
+.hero .eyebrow span {
+  font-family: "Hiragino Mincho ProN", "Yu Mincho", ui-serif, serif;
+  letter-spacing: 0.3em;
 }
 
 .line {
@@ -288,7 +314,7 @@
 .hero h1 {
   margin-bottom: 26px;
   font-size: clamp(44px, 5vw, 78px);
-  line-height: 0.98;
+  line-height: 0.96;
 }
 
 .hero h1 em {
@@ -296,8 +322,9 @@
 }
 
 .hero .hero-lede {
-  max-width: 450px;
+  max-width: 440px;
   margin-bottom: 28px;
+  line-height: 1.8;
   animation: fade-up 1s 0.3s both;
 }
 
@@ -326,9 +353,8 @@
   gap: 18px;
   margin: 26px 0 0;
   padding: 0;
-  color: var(--color-text-hero-note);
+  color: var(--color-text-secondary);
   font-size: 9px;
-  letter-spacing: 0.06em;
   list-style: none;
   animation: fade-up 1s 0.5s both;
 }
@@ -336,7 +362,7 @@
 .hero-notes li::before {
   content: "✓";
   margin-right: 6px;
-  color: var(--color-success-soft);
+  color: var(--color-success);
 }
 
 .scroll-cue {
@@ -422,6 +448,7 @@
   font:
     16px "Hiragino Mincho ProN",
     "Yu Mincho",
+    ui-serif,
     serif;
   letter-spacing: 0;
 }
@@ -520,18 +547,25 @@
   width: 30px;
   height: 30px;
   place-items: center;
+  padding: 0;
   border: 1px solid var(--landing-line);
   color: var(--color-text-tertiary);
-  background: var(--color-paper);
+  background: var(--color-surface);
   cursor: pointer;
   font:
     14px "Hiragino Mincho ProN",
     "Yu Mincho",
+    ui-serif,
     serif;
   transition:
     background 0.3s,
     color 0.3s,
     border-color 0.3s;
+}
+
+.chapters button:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .chapters button.active {
@@ -546,9 +580,9 @@
 
 .finale {
   position: absolute;
-  top: 12vh;
+  top: 9vh;
   left: 50%;
-  width: min(820px, calc(100% - 32px));
+  width: min(760px, calc(100% - 32px));
   translate: -50% 0;
   text-align: center;
   visibility: hidden;
@@ -561,7 +595,7 @@
 }
 
 .finale h2 {
-  margin: 0 0 32px;
+  margin: 0 0 30px;
   font:
     500 clamp(46px, 7vw, 104px) / 0.98 "Hiragino Mincho ProN",
     "Yu Mincho",
@@ -619,7 +653,7 @@
 }
 
 .finale > p:last-child {
-  margin: 20px 0 0;
+  margin: 18px 0 0;
   color: var(--color-text-secondary);
   font-size: 10px;
 }
@@ -731,6 +765,7 @@
   font:
     600 56px/1 "Hiragino Mincho ProN",
     "Yu Mincho",
+    ui-serif,
     serif;
   letter-spacing: -0.055em;
 }
@@ -1606,7 +1641,7 @@
   }
 
   .hero {
-    top: 90px;
+    top: 84px;
     left: 16px;
     width: calc(100% - 32px);
     margin: 0;
@@ -1621,7 +1656,6 @@
   .hero .hero-lede {
     margin-bottom: 18px;
     font-size: 14px;
-    line-height: 1.7;
   }
 
   .hero-notes {
@@ -1692,6 +1726,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html:has(.landing-shell) {
+    scroll-behavior: auto;
+  }
+
   .stage *,
   .stage *::before,
   .stage *::after {

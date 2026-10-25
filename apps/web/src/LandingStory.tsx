@@ -236,7 +236,9 @@ export function LandingStory(props: LandingStoryProps) {
             visibility: heroOut() >= 1 ? "hidden" : "visible",
           }}
         >
-          <p class="eyebrow">書く / Japanese input across your devices</p>
+          <p class="eyebrow">
+            <span lang="ja">書く</span> / Japanese input across your devices
+          </p>
           <h1 id="hero-title">
             <span class="line">
               <span>Write Japanese</span>

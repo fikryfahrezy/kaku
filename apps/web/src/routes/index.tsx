@@ -32,20 +32,16 @@ async function fetchLatestRelease(): Promise<Release | undefined> {
   }
 }
 
-function Brand(props: { caption?: boolean }) {
+function Brand() {
   return (
     <a class="brand" href="/" aria-label="Kaku home">
       <span class="brand-mark" lang="ja" aria-hidden="true">
         書
       </span>
-      {props.caption ? (
-        <span class="brand-name">
-          Kaku
-          <span class="brand-caption">JAPANESE HANDWRITING INPUT</span>
-        </span>
-      ) : (
-        <span>Kaku</span>
-      )}
+      <span class="brand-name">
+        Kaku
+        <span class="brand-caption">JAPANESE HANDWRITING INPUT</span>
+      </span>
     </a>
   );
 }
@@ -104,7 +100,7 @@ export default function Landing() {
         Skip to content
       </a>
       <header class="landing-nav">
-        <Brand caption />
+        <Brand />
         <nav aria-label="Main navigation">
           <button type="button" onClick={() => story?.jump(1.6)}>
             How it works
@@ -251,13 +247,15 @@ export default function Landing() {
       </main>
 
       <footer class="landing-footer">
-        <Brand />
-        <p>Handwrite on one device. Continue on another.</p>
-        {/* A full load keeps the landing styles from leaking into that page. */}
-        <a href="/licenses/" rel="external">
-          Open-source licenses
-        </a>
-        <span>Browser handwriting input · 2026</span>
+        <span lang="ja">書く · KAKU</span>
+        <span>HANDWRITE ON ONE DEVICE. CONTINUE ON ANOTHER.</span>
+        <nav aria-label="Footer navigation">
+          {/* A full load keeps the landing styles from leaking into that page. */}
+          <a href="/licenses/" rel="external">
+            OPEN-SOURCE LICENSES ↗
+          </a>
+          <a href="/app/">OPEN WRITING PAD ↗</a>
+        </nav>
       </footer>
     </div>
   );
