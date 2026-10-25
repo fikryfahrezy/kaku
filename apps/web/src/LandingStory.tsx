@@ -136,7 +136,11 @@ export function LandingStory(props: LandingStoryProps) {
       ` rotateX(${camera.rotateX}deg) rotateY(${camera.rotateY}deg)` +
       ` skewY(${camera.skew}deg) scale(${camera.scale})` +
       ` translate(${-camera.x}px, ${-camera.y}px)`;
-    rig.style.setProperty("--inverse", String(1 / camera.scale));
+    // Only the ring and cursor read --inverse, and changing it repaints the
+    // whole replica, which is costly while all of it is on screen.
+    if (next.highlight || next.cursor) {
+      rig.style.setProperty("--inverse", String(1 / camera.scale));
+    }
     rig.style.opacity = String(1 - span(u, 12.6, 13.3) * 0.55);
     place(ring, next.highlight, 8);
     place(cursor, next.cursor);
