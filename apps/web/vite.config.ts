@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { solidStart } from "@solidjs/start/config";
 import { nitro } from "nitro/vite";
-import { licenseNotices } from "./license-notices";
+import { licenseNotices } from "./license-notices.ts";
 
 const notices = licenseNotices();
 
